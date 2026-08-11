@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CDP — Gestionale offerte prosciutto cotto</title>
+  <meta name="description" content="Gestionale locale per inserire offerte di prosciutto cotto e consultare statistiche aggiornate in tempo reale." />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="ham-pattern" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div>
+          <h1>CDP</h1>
+          <p>Prosciutto Cotto Data</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Navigazione principale">
+        <button class="active" data-section="dashboard"><span class="nav-icon">⌂</span>Dashboard</button>
+        <button data-section="manage"><span class="nav-icon">＋</span>Nuova offerta</button>
+        <button data-section="live"><span class="nav-icon">◔</span>Statistiche live</button>
+        <button data-section="combinations"><span class="nav-icon">×</span>Analisi combinazioni</button>
+        <button data-section="trends"><span class="nav-icon">⌁</span>Top 10</button>
+        <button data-section="products"><span class="nav-icon">◫</span>Prodotti</button>
+        <button data-section="supermarkets"><span class="nav-icon">⌂</span>Supermercati</button>
+        <button data-section="data"><span class="nav-icon">≡</span>Dati</button>
+      </nav>
+
+      <div class="sidebar-card">
+        <span class="status-dot"></span>
+        <div>
+          <strong>Archivio flessibile</strong>
+          <small>Supabase online oppure archivio locale nel browser per l’uso offline.</small>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">CDP 2026</span>
+          <h2 id="page-title">Dashboard</h2>
+        </div>
+        <div class="topbar-right">
+          <div class="data-status" id="storage-status"><span class="status-dot"></span><span>Caricamento dati…</span></div>
+          <div class="source" id="source-label"></div>
+          <button id="auth-top-button" class="btn btn-soft btn-small" type="button">Area gestione</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="section active" id="dashboard">
+          <div class="hero-card">
+            <div>
+              <span class="eyebrow">Panoramica aggiornata</span>
+              <h3>Le offerte, senza più fogli sparsi.</h3>
+              <p>Ogni nuova riga aggiorna subito prezzi medi, classifiche e andamento temporale. Per i dati storici la data offerta è ricostruita come scadenza meno 10 giorni.</p>
+              <div class="hero-actions">
+                <button class="btn btn-primary" data-go="manage">Aggiungi offerta</button>
+                <button class="btn btn-soft" data-go="live">Vedi statistiche live</button>
+              </div>
+            </div>
+            <div class="ham-hero" aria-hidden="true">
+              <span class="slice slice-a"></span>
+              <span class="slice slice-b"></span>
+              <span class="slice slice-c"></span>
+              <span class="slice-hole hole-a"></span>
+              <span class="slice-hole hole-b"></span>
+            </div>
+          </div>
+
+          <div class="section-header compact-header">
+            <div><span class="eyebrow">Numeri principali</span><h3>Dashboard</h3></div>
+            <div class="live-pill"><span class="pulse"></span>Ricalcolo automatico</div>
+          </div>
+          <div id="dashboard-kpis" class="kpi-grid"></div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Prezzi</span><h4 class="panel-title">Andamento del prezzo medio</h4><p class="panel-subtitle">Media mensile sulla Data offerta</p></div></div>
+              <div id="monthly-price-chart" class="chart"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Frequenze</span><h4 class="panel-title">Top 10 prodotti</h4><p class="panel-subtitle">Numero di offerte presenti nel dataset corrente</p></div></div>
+              <div id="top-products-chart" class="chart"></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Richieste originali</span><h4 class="panel-title">Statistiche principali</h4><p class="panel-subtitle">Ranking denso: i pari merito restano tutti visibili</p></div></div>
+              <div id="requested-stats"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Lettura rapida</span><h4 class="panel-title">Commento ai dati</h4><p class="panel-subtitle">Sintesi automatica dei segnali principali</p></div></div>
+              <ul class="insight-list" id="insights"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="manage">
+          <div class="section-header">
+            <span class="eyebrow">Gestione offerte</span>
+            <h3>Nuova offerta</h3>
+            <p>Controlla prima quali supermercati devono essere rinnovati. La Data offerta delle nuove righe è sempre il giorno di inserimento.</p>
+          </div>
+
+          <div class="panel auth-panel" id="auth-panel">
+            <div class="auth-copy">
+              <span class="eyebrow">Accesso protetto</span>
+              <h4 class="panel-title">Area amministratore</h4>
+              <p>In cloud usa il tuo account Supabase. In locale puoi accedere anche senza Supabase con le credenziali locali configurate nel progetto.</p>
+            </div>
+            <form id="auth-form" class="auth-form">
+              <div class="field"><label for="auth-email">Email / utente</label><input id="auth-email" type="text" autocomplete="username" required /></div>
+              <div class="field"><label for="auth-password">Password</label><input id="auth-password" type="password" autocomplete="current-password" required /></div>
+              <button class="btn btn-primary" type="submit">Accedi</button>
+              <div id="auth-message" class="form-message error" role="alert" hidden></div>
+            </form>
+            <div id="auth-user" class="auth-user" hidden>
+              <div><span class="eyebrow">Connesso</span><strong id="auth-user-email"></strong></div>
+              <button id="auth-logout" type="button" class="btn btn-ghost btn-small">Esci</button>
+            </div>
+          </div>
+
+          <div class="panel renewal-panel">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Priorità di oggi</span>
+                <h4 class="panel-title">Supermercati da rinnovare</h4>
+                <p class="panel-subtitle">Il controllo è per supermercato: se dopo una scadenza è stata registrata una nuova offerta, anche di un altro prosciutto, l'insegna risulta rinnovata.</p>
+              </div>
+              <div id="supermarket-renewal-summary" class="renewal-summary"></div>
+            </div>
+            <div id="supermarket-renewal-board"></div>
+          </div>
+
+          <div id="admin-tools" hidden>
+            <div class="manage-grid">
+              <div class="panel form-panel">
+                <div class="panel-header"><div><h4 class="panel-title">Dettagli offerta</h4><p class="panel-subtitle">Inserisci la nuova rilevazione. Per lo storico Supermercato + Prosciutto usa la sezione pubblica Analisi combinazioni.</p></div><span class="form-badge" id="storage-form-badge">Archivio</span></div>
+                <form id="offer-form" novalidate>
+                  <div class="form-grid">
+                    <div class="field field-wide">
+                      <div class="field-label-row"><label for="offer-supermarket">Supermercato</label><button class="inline-link" type="button" data-focus-catalog="supermarket">+ Nuovo supermercato</button></div>
+                      <select id="offer-supermarket" name="supermarket" required></select>
+                    </div>
+                    <div class="field field-wide">
+                      <div class="field-label-row"><label for="offer-product">Prosciutto / prodotto</label><button class="inline-link" type="button" data-focus-catalog="product">+ Nuovo prosciutto</button></div>
+                      <select id="offer-product" name="product" required></select>
+                    </div>
+                    <div class="field">
+                      <label for="offer-type">Tipologia</label>
+                      <input id="offer-type" name="type" list="type-options" autocomplete="off" placeholder="Es. Alta Qualità" required />
+                      <datalist id="type-options"></datalist>
+                    </div>
+                    <div class="field">
+                      <label for="offer-price">Prezzo (€)</label>
+                      <input id="offer-price" name="price" type="text" inputmode="decimal" placeholder="Es. 12,90" required />
+                    </div>
+                    <div class="field">
+                      <label for="offer-date">Data offerta</label>
+                      <input id="offer-date" name="offerDate" type="date" readonly />
+                      <small>Impostata automaticamente a oggi</small>
+                    </div>
+                    <div class="field">
+                      <label for="offer-expiry">Data scadenza</label>
+                      <input id="offer-expiry" name="expiryDate" type="date" required />
+                    </div>
+                  </div>
+                  <div id="form-error" class="form-message error" role="alert" hidden></div>
+                  <div id="form-success" class="form-message success" role="status" hidden></div>
+                  <div class="form-actions">
+                    <button type="submit" id="save-offer" class="btn btn-primary">Salva offerta</button>
+                    <button type="reset" class="btn btn-ghost">Pulisci campi</button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="panel catalog-panel">
+                <div class="panel-header"><div><span class="eyebrow">Anagrafiche</span><h4 class="panel-title">Aggiungi cataloghi</h4><p class="panel-subtitle">I nuovi valori diventano subito disponibili nella nuova offerta</p></div></div>
+                <form id="catalog-supermarket-form" class="catalog-form">
+                  <div class="field"><label for="catalog-supermarket-name">Nuovo supermercato</label><input id="catalog-supermarket-name" type="text" placeholder="Nome insegna" required /></div>
+                  <button class="btn btn-soft btn-small" type="submit">Aggiungi supermercato</button>
+                </form>
+                <div class="catalog-divider"></div>
+                <form id="catalog-product-form" class="catalog-form">
+                  <div class="field"><label for="catalog-product-name">Nuovo prosciutto</label><input id="catalog-product-name" type="text" placeholder="Marca - prodotto" required /></div>
+                  <div class="field"><label for="catalog-product-type">Tipologia predefinita</label><input id="catalog-product-type" type="text" list="type-options" placeholder="Es. Alta Qualità" /></div>
+                  <button class="btn btn-soft btn-small" type="submit">Aggiungi prosciutto</button>
+                </form>
+                <div class="catalog-divider"></div>
+                <div class="backup-actions compact-backup">
+                  <button id="export-backup" class="backup-action"><span>↓</span><div><strong>Esporta JSON</strong><small>Backup completo dell’archivio corrente</small></div></button>
+                  <button id="export-csv" class="backup-action"><span>⇩</span><div><strong>Esporta CSV</strong><small>Tutte le offerte correnti</small></div></button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div><span class="eyebrow">Inserimenti manuali</span><h4 class="panel-title">Offerte inserite manualmente</h4><p class="panel-subtitle"><span id="user-offer-count">0</span> offerte aggiunte oltre allo storico</p></div></div>
+            <div id="user-offers-table"></div>
+          </div>
+        </section>
+
+        <section class="section" id="live">
+          <div class="section-header live-header">
+            <div>
+              <span class="eyebrow">Statistiche in tempo reale</span>
+              <h3>Mese, trimestre e anno</h3>
+              <p>Seleziona la granularità e un periodo: ogni valore viene ricalcolato sul dataset corrente usando la Data offerta.</p>
+            </div>
+            <div class="live-controls">
+              <div class="segmented" id="live-granularity" aria-label="Granularità statistiche">
+                <button type="button" class="active" data-granularity="month">Mese</button>
+                <button type="button" data-granularity="quarter">Trimestre</button>
+                <button type="button" data-granularity="year">Anno</button>
+              </div>
+              <div class="field live-period-field">
+                <label for="live-period-select">Periodo</label>
+                <select id="live-period-select"></select>
+              </div>
+            </div>
+          </div>
+
+          <div id="live-kpis" class="kpi-grid live-kpis"></div>
+          <div id="live-compare" class="comparison-strip"></div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Andamento</span><h4 class="panel-title">Prezzo medio nel periodo</h4><p class="panel-subtitle" id="live-trend-subtitle"></p></div></div>
+              <div id="live-trend-chart" class="chart"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Volume</span><h4 class="panel-title">Offerte nel periodo</h4><p class="panel-subtitle">Numero di rilevazioni per sotto-periodo</p></div></div>
+              <div id="live-count-chart" class="chart"></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Ranking</span><h4 class="panel-title">Top 5 prodotti</h4><p class="panel-subtitle">Pari merito inclusi</p></div></div>
+              <div id="live-top-products"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Ranking</span><h4 class="panel-title">Top 5 supermercati</h4><p class="panel-subtitle">Per numero di offerte nel periodo</p></div></div>
+              <div id="live-top-supermarkets"></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Tipologie</span><h4 class="panel-title">Distribuzione nel periodo</h4></div></div>
+              <div id="live-types-table"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div><span class="eyebrow">Storico</span><h4 class="panel-title">Riepilogo per periodo</h4><p class="panel-subtitle">Vista completa della granularità selezionata</p></div></div>
+              <div id="live-history-table"></div>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="section" id="combinations">
+          <div class="section-header">
+            <span class="eyebrow">Analisi pubblica</span>
+            <h3>Supermercato × Prosciutto</h3>
+            <p>Confronta lo storico di una specifica combinazione senza accedere all'area amministratore: prezzi, frequenza di rinnovo e attività nel mese, trimestre e anno correnti.</p>
+          </div>
+          <div class="panel combination-selector-panel">
+            <div class="toolbar combination-toolbar">
+              <div class="field"><label for="public-combination-supermarket">Supermercato</label><select id="public-combination-supermarket"></select></div>
+              <div class="field"><label for="public-combination-product">Prosciutto / prodotto</label><select id="public-combination-product"></select></div>
+            </div>
+          </div>
+          <div class="panel combination-panel">
+            <div class="panel-header">
+              <div><span class="eyebrow">Storico mirato</span><h4 class="panel-title">Statistiche combinazione</h4><p class="panel-subtitle">I dati sono pubblici e si aggiornano insieme al dataset corrente.</p></div>
+            </div>
+            <div id="public-combination-stats"><div class="empty-state">Seleziona un supermercato e un prosciutto per vedere le statistiche temporali della combinazione.</div></div>
+            <div class="grid-2 combination-grid">
+              <div><div id="public-combination-trend-chart" class="chart compact"></div></div>
+              <div id="public-combination-history"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="trends">
+          <div class="section-header">
+            <span class="eyebrow">Andamento prodotti</span>
+            <h3>I 10 prosciutti più frequenti</h3>
+            <p>Un grafico dedicato per ciascuno dei primi 10 prodotti, calcolato sul mese della Data offerta.</p>
+          </div>
+          <div class="callout"><strong>Nota storica:</strong> per i 781 record originali la Data offerta è stata ricostruita sottraendo 10 giorni alla Data scadenza. Le nuove offerte usano invece il giorno reale di inserimento.</div>
+          <div id="top10-grid" class="mini-chart-grid"></div>
+        </section>
+
+        <section class="section" id="products">
+          <div class="section-header">
+            <span class="eyebrow">Analisi per prodotto</span>
+            <h3>Prosciutti</h3>
+            <p>Statistiche complete e Top 5 supermercati per ogni prodotto, con tutti i pari merito.</p>
+          </div>
+          <div class="toolbar toolbar-panel">
+            <div class="field"><label for="product-select">Prodotto</label><select id="product-select"></select></div>
+          </div>
+          <div id="product-detail"></div>
+          <div class="grid-2">
+            <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Top 5 supermercati</h4><p class="panel-subtitle">Rank denso, pari merito inclusi</p></div></div><div id="product-supermarkets-chart" class="chart"></div></div>
+            <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Classifica dettagliata</h4><p class="panel-subtitle">Presenze e prezzo medio</p></div></div><div id="product-supermarkets-table"></div></div>
+          </div>
+          <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Tutti i prodotti</h4><p class="panel-subtitle">Statistiche aggregate sul dataset corrente</p></div></div><div id="products-table"></div></div>
+        </section>
+
+        <section class="section" id="supermarkets">
+          <div class="section-header">
+            <span class="eyebrow">Analisi per insegna</span>
+            <h3>Supermercati</h3>
+            <p>Statistiche e Top 5 prodotti più frequentemente in offerta, con tutti i pari merito.</p>
+          </div>
+          <div class="toolbar toolbar-panel">
+            <div class="field"><label for="supermarket-select">Supermercato</label><select id="supermarket-select"></select></div>
+          </div>
+          <div id="supermarket-detail"></div>
+          <div class="grid-2">
+            <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Top 5 prodotti</h4><p class="panel-subtitle">Rank denso, pari merito inclusi</p></div></div><div id="supermarket-products-chart" class="chart"></div></div>
+            <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Classifica dettagliata</h4><p class="panel-subtitle">Presenze e prezzo medio</p></div></div><div id="supermarket-products-table"></div></div>
+          </div>
+          <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Tutti i supermercati</h4><p class="panel-subtitle">Confronto sul dataset corrente</p></div></div><div id="supermarkets-table"></div></div>
+        </section>
+
+        <section class="section" id="data">
+          <div class="section-header">
+            <span class="eyebrow">Archivio completo</span>
+            <h3>Tutti i dati</h3>
+            <p>Storico originale più nuove offerte. Le statistiche temporali sono basate sulla Data offerta.</p>
+          </div>
+          <div class="panel">
+            <div class="toolbar filters-toolbar">
+              <div class="field"><label for="filter-query">Ricerca</label><input id="filter-query" type="search" placeholder="Prodotto, supermercato…" /></div>
+              <div class="field"><label for="filter-supermarket">Supermercato</label><select id="filter-supermarket"></select></div>
+              <div class="field"><label for="filter-product">Prodotto</label><select id="filter-product"></select></div>
+              <div class="field"><label for="filter-type">Tipologia</label><select id="filter-type"></select></div>
+              <div class="field"><label for="filter-month">Mese offerta</label><select id="filter-month"></select></div>
+              <div class="field"><label for="filter-origin">Origine</label><select id="filter-origin"><option value="">Tutte</option><option value="historical">Storico</option><option value="manual">Inserita</option></select></div>
+              <div class="field"><label for="filter-sort">Ordina per data</label><select id="filter-sort"><option value="offerDateDesc">Data offerta — più recente</option><option value="offerDateAsc">Data offerta — meno recente</option><option value="expiryDateDesc">Data scadenza — più recente</option><option value="expiryDateAsc">Data scadenza — meno recente</option></select></div>
+            </div>
+            <div id="data-table"></div>
+            <div class="pagination"><button id="prev-page" class="btn btn-ghost">← Precedente</button><span id="page-info"></span><button id="next-page" class="btn btn-ghost">Successiva →</button></div>
+          </div>
+          <p class="footer-note">Dataset storico: CDP 2026(1).xlsx · Data offerta storica = Data scadenza − 10 giorni · Nuove offerte e cataloghi salvati su Supabase oppure nel browser in modalità locale.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="data/cdp-data.js"></script>
+  <script src="js/data-model.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-store.js"></script>
+  <script src="js/local-store.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

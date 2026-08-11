@@ -1,0 +1,61 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const source = fs.readFileSync(path.join(__dirname, '../js/app.js'), 'utf8');
+
+test('la app usa dataset storico come fallback e Supabase come fonte cloud', () => {
+  assert.match(source, /CDPDataModel/);
+  assert.match(source, /CDPCloudStore/);
+  assert.match(source, /normalizeHistoricalRows/);
+  assert.match(source, /loadDataset/);
+  assert.match(source, /loadCatalogs/);
+  assert.match(source, /Cloud\.subscribe/);
+});
+
+test('la app implementa login admin, cataloghi e CRUD offerte', () => {
+  assert.match(source, /signIn/);
+  assert.match(source, /isAdmin/);
+  assert.match(source, /addSupermarket/);
+  assert.match(source, /addProduct/);
+  assert.match(source, /addOffer/);
+  assert.match(source, /deleteOffer/);
+});
+
+test('la app implementa coda rinnovi, sort date e statistiche live', () => {
+  assert.match(source, /supermarketRenewalStatus/);
+  assert.match(source, /filter-sort/);
+  assert.match(source, /function\s+renderLive\s*\(/);
+  assert.match(source, /periodSummary/);
+  assert.match(source, /previousPeriodKey/);
+});
+
+test('la app implementa export JSON e CSV', () => {
+  assert.match(source, /cdp-cloud-backup/);
+  assert.match(source, /application\/json/);
+  assert.match(source, /text\/csv/);
+});
+
+test('la app usa il rinnovo a livello supermercato e le statistiche della combinazione', () => {
+  assert.match(source, /supermarketRenewalStatus/);
+  assert.match(source, /combinationStats/);
+  assert.match(source, /function\s+renderSupermarketRenewalBoard\s*\(/);
+  assert.match(source, /function\s+renderCombinationStats\s*\(/);
+});
+
+test('la app supporta login e persistenza locale senza Supabase', () => {
+  assert.match(source, /CDPLocalStore/);
+  assert.match(source, /localMode/);
+  assert.match(source, /Local\.authenticate/);
+  assert.match(source, /Local\.addOffer/);
+  assert.match(source, /Local\.addSupermarket/);
+  assert.match(source, /Local\.addProduct/);
+});
+
+test('la app rende pubblica la sezione Analisi combinazioni', () => {
+  assert.match(source, /function\s+renderPublicCombinationStats\s*\(/);
+  assert.match(source, /public-combination-supermarket/);
+  assert.match(source, /public-combination-product/);
+  assert.match(source, /combinations:\s*'Analisi combinazioni'/);
+});

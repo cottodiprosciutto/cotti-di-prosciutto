@@ -1,0 +1,9 @@
+{
+  "name": "cdp-prosciutti-cloud",
+  "private": true,
+  "version": "1.2.0",
+  "description": "Dashboard CDP con Supabase, GitHub Pages e modalità amministratore locale",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}
