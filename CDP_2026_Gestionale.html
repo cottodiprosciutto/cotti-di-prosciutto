@@ -2037,25 +2037,62 @@ window.CDP_CONFIG = {
     };
   }
 
-  const OFFER_SELECT = 'id,type,price,offer_date,expiry_date,source,created_at,supermarket:supermarkets(id,name),product:products(id,name,default_type,mode,image_path,brand_id,brand:brands(id,name,logo_path)),variant:product_variants(id,weight_grams)';
+  const OFFER_SELECT = 'id,supermarket_id,product_id,variant_id,type,price,offer_date,expiry_date,source,created_at';
 
-  async function loadDataset() {
-    const { data, error } = await getClient().from('offers').select(OFFER_SELECT).order('offer_date', { ascending: true });
-    if (error) throw error;
-    return (data || []).map(normalizeOfferRow);
+  function assembleSnapshot(raw = {}) {
+    const supermarkets = raw.supermarkets || [];
+    const brands = raw.brands || [];
+    const variants = raw.variants || [];
+    const supermarketById = new Map(supermarkets.map((item) => [String(item.id), item]));
+    const brandById = new Map(brands.map((item) => [String(item.id), item]));
+    const variantById = new Map(variants.map((item) => [String(item.id), item]));
+    const products = (raw.products || []).map((item) => ({
+      ...item,
+      brand: item.brand_id ? (brandById.get(String(item.brand_id)) || null) : null
+    }));
+    const productById = new Map(products.map((item) => [String(item.id), item]));
+    const rows = (raw.offers || []).map((row) => normalizeOfferRow({
+      ...row,
+      supermarket: supermarketById.get(String(row.supermarket_id)) || null,
+      product: productById.get(String(row.product_id)) || null,
+      variant: row.variant_id ? (variantById.get(String(row.variant_id)) || null) : null
+    }));
+    return { rows, catalogs: { supermarkets, products, brands, variants } };
   }
 
-  async function loadCatalogs() {
+  async function loadSnapshot() {
     const db = getClient();
-    const [supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
-      db.from('supermarkets').select('id,name').order('name', { ascending: true }),
-      db.from('products').select('id,name,default_type,mode,brand_id,image_path,brand:brands(id,name,logo_path)').order('name', { ascending: true }),
-      db.from('brands').select('id,name,slug,logo_path').order('name', { ascending: true }),
-      db.from('product_variants').select('id,product_id,weight_grams').order('weight_grams', { ascending: true })
+    const [offersResult, supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
+      db.from('offers').select('*').order('offer_date', { ascending: true }),
+      db.from('supermarkets').select('*').order('name', { ascending: true }),
+      db.from('products').select('*').order('name', { ascending: true }),
+      db.from('brands').select('*').order('name', { ascending: true }),
+      db.from('product_variants').select('*').order('weight_grams', { ascending: true })
     ]);
-    for (const result of [supermarketsResult, productsResult, brandsResult, variantsResult]) if (result.error) throw result.error;
-    return { supermarkets: supermarketsResult.data || [], products: productsResult.data || [], brands: brandsResult.data || [], variants: variantsResult.data || [] };
+    const results = [
+      ['offers', offersResult],
+      ['supermarkets', supermarketsResult],
+      ['products', productsResult],
+      ['brands', brandsResult],
+      ['product_variants', variantsResult]
+    ];
+    for (const [table, result] of results) {
+      if (result.error) {
+        const detail = result.error.message || result.error.details || 'errore sconosciuto';
+        throw new Error(`Errore Supabase sulla tabella ${table}: ${detail}`);
+      }
+    }
+    return assembleSnapshot({
+      offers: offersResult.data || [],
+      supermarkets: supermarketsResult.data || [],
+      products: productsResult.data || [],
+      brands: brandsResult.data || [],
+      variants: variantsResult.data || []
+    });
   }
+
+  async function loadDataset() { return (await loadSnapshot()).rows; }
+  async function loadCatalogs() { return (await loadSnapshot()).catalogs; }
 
   async function getSession() { const { data, error } = await getClient().auth.getSession(); if (error) throw error; return data?.session || null; }
   async function signIn(email, password) { const { data, error } = await getClient().auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') }); if (error) throw error; return data?.session || null; }
@@ -2075,7 +2112,7 @@ window.CDP_CONFIG = {
     };
     const { data, error } = await getClient().from('offers').insert(payload).select(OFFER_SELECT).single();
     if (error) throw error;
-    return normalizeOfferRow(data);
+    return data;
   }
 
   async function deleteOffer(id) { const { error } = await getClient().from('offers').delete().eq('id', id); if (error) throw error; }
@@ -2181,7 +2218,7 @@ window.CDP_CONFIG = {
   }
 
   return {
-    isConfigured, configure, normalizeOfferRow, loadDataset, loadCatalogs,
+    isConfigured, configure, normalizeOfferRow, assembleSnapshot, loadSnapshot, loadDataset, loadCatalogs,
     getSession, signIn, signOut, isAdmin,
     addOffer, deleteOffer, addSupermarket, addBrand, addProduct, updateProduct, addVariant,
     uploadBrandLogo, uploadProductImage, publicAssetUrl,
@@ -2633,6 +2670,19 @@ window.CDP_CONFIG = {
   function rebuildRows() {
     state.rows = A.sortRows(state.rows, 'offerDateAsc');
     state.userOffers = state.rows.filter((row) => row.origin !== 'historical');
+  }
+
+  function currentAggregates() {
+    const rows = state.rows;
+    return {
+      summary: A.summarize(rows),
+      products: A.productStats(rows),
+      supermarkets: A.supermarketStats(rows),
+      months: A.monthlyStats(rows),
+      quarters: A.quarterlyStats(rows),
+      years: A.yearlyStats(rows),
+      types: A.typeStats(rows)
+    };
   }
 
   function applyModeScope() {
@@ -3501,9 +3551,9 @@ window.CDP_CONFIG = {
 
   async function reloadCloudData(options = {}) {
     if (!state.cloudMode) return;
-    const [rows, catalogs] = await Promise.all([Cloud.loadDataset(), Cloud.loadCatalogs()]);
-    state.allRows = rows;
-    state.allCatalogs = catalogs;
+    const snapshot = await Cloud.loadSnapshot();
+    state.allRows = snapshot.rows;
+    state.allCatalogs = snapshot.catalogs;
     applyModeScope();
     if (!options.skipRender) refreshAll();
   }
@@ -3913,6 +3963,72 @@ window.CDP_CONFIG = {
     });
   }
 
+  function cloudErrorMessage(error) {
+    if (!error) return 'errore sconosciuto';
+    return String(error.message || error.details || error.hint || error.code || error).trim() || 'errore sconosciuto';
+  }
+
+  async function initializeCloudAuth() {
+    try {
+      state.session = await Cloud.getSession();
+      state.isAdmin = state.session ? await Cloud.isAdmin() : false;
+    } catch (error) {
+      // Un problema Auth/RPC non deve far sembrare offline il database Supabase.
+      state.session = null;
+      state.isAdmin = false;
+      const detail = cloudErrorMessage(error);
+      console.error('[CDP] Autenticazione Supabase non disponibile:', error);
+      showToast(`Autenticazione Supabase non disponibile: ${detail}`, 'error');
+    }
+  }
+
+  function initializeCloudRealtime() {
+    try {
+      Cloud.subscribe(() => {
+        clearTimeout(state.realtimeTimer);
+        state.realtimeTimer = setTimeout(async () => {
+          try { await reloadCloudData(); }
+          catch (error) {
+            console.error('[CDP] Aggiornamento realtime non riuscito:', error);
+            showToast(`Aggiornamento realtime non riuscito: ${cloudErrorMessage(error)}`, 'error');
+          }
+        }, 180);
+      });
+      return true;
+    } catch (error) {
+      console.error('[CDP] Realtime Supabase non disponibile:', error);
+      showToast(`Realtime Supabase non disponibile: ${cloudErrorMessage(error)}`, 'error');
+      return false;
+    }
+  }
+
+  function activateCloudFallback(error, localAllowed) {
+    const detail = cloudErrorMessage(error);
+    console.error('[CDP] Caricamento dati Supabase non riuscito:', error);
+    state.cloudMode = false;
+    state.localMode = localAllowed;
+
+    if (state.localMode) {
+      reloadLocalData({ skipRender: true });
+      const username = Local.sessionUser();
+      state.session = username ? { provider: 'local', user: { username } } : null;
+      state.isAdmin = !!state.session;
+      setStorageStatus(true, `Supabase dati non disponibili · ${detail} · archivio locale attivo`);
+    } else {
+      state.allRows = historicalRows.slice();
+      state.allCatalogs = buildReadOnlyCatalogs(state.allRows);
+      applyModeScope();
+      state.session = null;
+      state.isAdmin = false;
+      setStorageStatus(false, `Supabase dati non disponibili · ${detail} · sola lettura`);
+    }
+
+    updateAuthUi();
+    renderModeUi();
+    refreshAll();
+    showToast(`Caricamento dati Supabase non riuscito: ${detail}`, 'error');
+  }
+
   async function init() {
     wireEvents();
     setFormDate();
@@ -3924,39 +4040,24 @@ window.CDP_CONFIG = {
 
     if (state.cloudMode) {
       try {
+        // Il solo caricamento DB decide se la sorgente Supabase è disponibile.
         await reloadCloudData({ skipRender: true });
-        state.session = await Cloud.getSession();
-        state.isAdmin = state.session ? await Cloud.isAdmin() : false;
-        setStorageStatus(true, 'Supabase online · aggiornamento realtime');
-        updateAuthUi();
-        renderModeUi();
-        refreshAll();
-        Cloud.subscribe(() => {
-          clearTimeout(state.realtimeTimer);
-          state.realtimeTimer = setTimeout(async () => {
-            try { await reloadCloudData(); } catch (error) { showToast('Aggiornamento realtime non riuscito', 'error'); }
-          }, 180);
-        });
       } catch (error) {
-        state.cloudMode = false;
-        state.localMode = localAllowed;
-        if (state.localMode) {
-          reloadLocalData({ skipRender: true });
-          const username = Local.sessionUser();
-          state.session = username ? { provider: 'local', user: { username } } : null;
-          state.isAdmin = !!state.session;
-          setStorageStatus(true, 'Supabase non raggiungibile · archivio locale attivo');
-        } else {
-          state.allRows = historicalRows.slice();
-          state.allCatalogs = buildReadOnlyCatalogs(state.allRows);
-          applyModeScope();
-          setStorageStatus(false, 'Supabase non raggiungibile · sola lettura');
-        }
-        updateAuthUi();
-        renderModeUi();
-        refreshAll();
-        showToast(error.message || 'Impossibile caricare i dati da Supabase', 'error');
+        activateCloudFallback(error, localAllowed);
+        return;
       }
+
+      // Auth/admin è indipendente dalla disponibilità del database.
+      await initializeCloudAuth();
+      setStorageStatus(true, 'Supabase online · dati collegati');
+      updateAuthUi();
+      renderModeUi();
+      refreshAll();
+
+      const realtimeOk = initializeCloudRealtime();
+      setStorageStatus(true, realtimeOk
+        ? 'Supabase online · aggiornamento realtime'
+        : 'Supabase online · realtime non disponibile');
     } else if (state.localMode) {
       reloadLocalData({ skipRender: true });
       const username = Local.sessionUser();

@@ -104,14 +104,24 @@
   async function loadSnapshot() {
     const db = getClient();
     const [offersResult, supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
-      db.from('offers').select(OFFER_SELECT).order('offer_date', { ascending: true }),
-      db.from('supermarkets').select('id,name').order('name', { ascending: true }),
-      db.from('products').select('id,name,default_type,mode,brand_id,image_path').order('name', { ascending: true }),
-      db.from('brands').select('id,name,slug,logo_path').order('name', { ascending: true }),
-      db.from('product_variants').select('id,product_id,weight_grams').order('weight_grams', { ascending: true })
+      db.from('offers').select('*').order('offer_date', { ascending: true }),
+      db.from('supermarkets').select('*').order('name', { ascending: true }),
+      db.from('products').select('*').order('name', { ascending: true }),
+      db.from('brands').select('*').order('name', { ascending: true }),
+      db.from('product_variants').select('*').order('weight_grams', { ascending: true })
     ]);
-    for (const result of [offersResult, supermarketsResult, productsResult, brandsResult, variantsResult]) {
-      if (result.error) throw result.error;
+    const results = [
+      ['offers', offersResult],
+      ['supermarkets', supermarketsResult],
+      ['products', productsResult],
+      ['brands', brandsResult],
+      ['product_variants', variantsResult]
+    ];
+    for (const [table, result] of results) {
+      if (result.error) {
+        const detail = result.error.message || result.error.details || 'errore sconosciuto';
+        throw new Error(`Errore Supabase sulla tabella ${table}: ${detail}`);
+      }
     }
     return assembleSnapshot({
       offers: offersResult.data || [],

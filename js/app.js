@@ -143,6 +143,19 @@
     state.userOffers = state.rows.filter((row) => row.origin !== 'historical');
   }
 
+  function currentAggregates() {
+    const rows = state.rows;
+    return {
+      summary: A.summarize(rows),
+      products: A.productStats(rows),
+      supermarkets: A.supermarketStats(rows),
+      months: A.monthlyStats(rows),
+      quarters: A.quarterlyStats(rows),
+      years: A.yearlyStats(rows),
+      types: A.typeStats(rows)
+    };
+  }
+
   function applyModeScope() {
     const scoped = MC.scope(state.allRows, state.allCatalogs, state.mode);
     state.rows = scoped.rows;
@@ -1421,6 +1434,72 @@
     });
   }
 
+  function cloudErrorMessage(error) {
+    if (!error) return 'errore sconosciuto';
+    return String(error.message || error.details || error.hint || error.code || error).trim() || 'errore sconosciuto';
+  }
+
+  async function initializeCloudAuth() {
+    try {
+      state.session = await Cloud.getSession();
+      state.isAdmin = state.session ? await Cloud.isAdmin() : false;
+    } catch (error) {
+      // Un problema Auth/RPC non deve far sembrare offline il database Supabase.
+      state.session = null;
+      state.isAdmin = false;
+      const detail = cloudErrorMessage(error);
+      console.error('[CDP] Autenticazione Supabase non disponibile:', error);
+      showToast(`Autenticazione Supabase non disponibile: ${detail}`, 'error');
+    }
+  }
+
+  function initializeCloudRealtime() {
+    try {
+      Cloud.subscribe(() => {
+        clearTimeout(state.realtimeTimer);
+        state.realtimeTimer = setTimeout(async () => {
+          try { await reloadCloudData(); }
+          catch (error) {
+            console.error('[CDP] Aggiornamento realtime non riuscito:', error);
+            showToast(`Aggiornamento realtime non riuscito: ${cloudErrorMessage(error)}`, 'error');
+          }
+        }, 180);
+      });
+      return true;
+    } catch (error) {
+      console.error('[CDP] Realtime Supabase non disponibile:', error);
+      showToast(`Realtime Supabase non disponibile: ${cloudErrorMessage(error)}`, 'error');
+      return false;
+    }
+  }
+
+  function activateCloudFallback(error, localAllowed) {
+    const detail = cloudErrorMessage(error);
+    console.error('[CDP] Caricamento dati Supabase non riuscito:', error);
+    state.cloudMode = false;
+    state.localMode = localAllowed;
+
+    if (state.localMode) {
+      reloadLocalData({ skipRender: true });
+      const username = Local.sessionUser();
+      state.session = username ? { provider: 'local', user: { username } } : null;
+      state.isAdmin = !!state.session;
+      setStorageStatus(true, `Supabase dati non disponibili · ${detail} · archivio locale attivo`);
+    } else {
+      state.allRows = historicalRows.slice();
+      state.allCatalogs = buildReadOnlyCatalogs(state.allRows);
+      applyModeScope();
+      state.session = null;
+      state.isAdmin = false;
+      setStorageStatus(false, `Supabase dati non disponibili · ${detail} · sola lettura`);
+    }
+
+    updateAuthUi();
+    renderModeUi();
+    refreshAll();
+    showToast(`Caricamento dati Supabase non riuscito: ${detail}`, 'error');
+  }
+
   async function init() {
     wireEvents();
     setFormDate();
@@ -1432,39 +1511,24 @@
 
     if (state.cloudMode) {
       try {
+        // Il solo caricamento DB decide se la sorgente Supabase è disponibile.
         await reloadCloudData({ skipRender: true });
-        state.session = await Cloud.getSession();
-        state.isAdmin = state.session ? await Cloud.isAdmin() : false;
-        setStorageStatus(true, 'Supabase online · aggiornamento realtime');
-        updateAuthUi();
-        renderModeUi();
-        refreshAll();
-        Cloud.subscribe(() => {
-          clearTimeout(state.realtimeTimer);
-          state.realtimeTimer = setTimeout(async () => {
-            try { await reloadCloudData(); } catch (error) { showToast('Aggiornamento realtime non riuscito', 'error'); }
-          }, 180);
-        });
       } catch (error) {
-        state.cloudMode = false;
-        state.localMode = localAllowed;
-        if (state.localMode) {
-          reloadLocalData({ skipRender: true });
-          const username = Local.sessionUser();
-          state.session = username ? { provider: 'local', user: { username } } : null;
-          state.isAdmin = !!state.session;
-          setStorageStatus(true, 'Supabase non raggiungibile · archivio locale attivo');
-        } else {
-          state.allRows = historicalRows.slice();
-          state.allCatalogs = buildReadOnlyCatalogs(state.allRows);
-          applyModeScope();
-          setStorageStatus(false, 'Supabase non raggiungibile · sola lettura');
-        }
-        updateAuthUi();
-        renderModeUi();
-        refreshAll();
-        showToast(error.message || 'Impossibile caricare i dati da Supabase', 'error');
+        activateCloudFallback(error, localAllowed);
+        return;
       }
+
+      // Auth/admin è indipendente dalla disponibilità del database.
+      await initializeCloudAuth();
+      setStorageStatus(true, 'Supabase online · dati collegati');
+      updateAuthUi();
+      renderModeUi();
+      refreshAll();
+
+      const realtimeOk = initializeCloudRealtime();
+      setStorageStatus(true, realtimeOk
+        ? 'Supabase online · aggiornamento realtime'
+        : 'Supabase online · realtime non disponibile');
     } else if (state.localMode) {
       reloadLocalData({ skipRender: true });
       const username = Local.sessionUser();

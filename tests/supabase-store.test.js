@@ -73,3 +73,46 @@ test('espone gestione marchi, varianti e immagini cloud', () => {
     assert.equal(typeof Store[name], 'function', `${name} deve essere una funzione`);
   }
 });
+
+test('costruisce lo snapshot v4 unendo tabelle Supabase piatte senza relazioni PostgREST annidate', () => {
+  assert.equal(typeof Store.assembleSnapshot, 'function');
+  const snapshot = Store.assembleSnapshot({
+    offers: [{
+      id: 'o1', supermarket_id: 's1', product_id: 'p1', variant_id: 'v1', type: null,
+      price: '1.59', offer_date: '2026-08-12', expiry_date: '2026-08-22', source: 'historical', created_at: '2026-08-12T00:00:00Z'
+    }],
+    supermarkets: [{ id: 's1', name: 'Coop' }],
+    products: [{ id: 'p1', name: 'GranTerre - Liberamente', default_type: null, mode: 'vaschetta', brand_id: 'b1', image_path: 'p1/foto.webp' }],
+    brands: [{ id: 'b1', name: 'GranTerre', slug: 'granterre', logo_path: 'b1/logo.webp' }],
+    variants: [{ id: 'v1', product_id: 'p1', weight_grams: 110 }]
+  });
+
+  assert.equal(snapshot.rows.length, 1);
+  assert.equal(snapshot.rows[0].supermarket, 'Coop');
+  assert.equal(snapshot.rows[0].product, 'GranTerre - Liberamente');
+  assert.equal(snapshot.rows[0].brand.name, 'GranTerre');
+  assert.equal(snapshot.rows[0].weightGrams, 110);
+  assert.equal(snapshot.rows[0].comparisonPrice, 14.45);
+  assert.equal(snapshot.catalogs.products[0].brand.name, 'GranTerre');
+});
+
+
+test('il caricamento cloud v4 usa select piatte e non embedding relazionali PostgREST', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const source = fs.readFileSync(path.join(__dirname, '../js/supabase-store.js'), 'utf8');
+  assert.match(source, /from\('offers'\)\.select\('\*'\)/);
+  assert.match(source, /from\('products'\)\.select\('\*'\)/);
+  assert.doesNotMatch(source, /brand:brands\(/);
+  assert.doesNotMatch(source, /variant:product_variants\(/);
+});
+
+
+test('il caricamento snapshot non dipende da colonne opzionali nominate esplicitamente', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const source = fs.readFileSync(path.join(__dirname, '../js/supabase-store.js'), 'utf8');
+  assert.match(source, /from\('products'\)\.select\('\*'\)/);
+  assert.match(source, /from\('brands'\)\.select\('\*'\)/);
+  assert.match(source, /from\('product_variants'\)\.select\('\*'\)/);
+});
