@@ -6,6 +6,7 @@
   'use strict';
 
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const MODES = ['taglio', 'vaschetta'];
 
   function assertIsoDate(value, label = 'Data') {
     if (!ISO_DATE.test(String(value || ''))) throw new Error(`${label} non valida`);
@@ -46,14 +47,41 @@
     };
   }
 
+  function normalizeMode(value) {
+    const mode = String(value || 'taglio').trim().toLocaleLowerCase('it');
+    if (!MODES.includes(mode)) throw new Error('Modalità prodotto non valida');
+    return mode;
+  }
+
+  function normalizeWeight(value, required = false) {
+    if (value === null || value === undefined || String(value).trim() === '') {
+      if (required) throw new Error('Peso obbligatorio per i cotti in vaschetta');
+      return null;
+    }
+    const grams = Number(value);
+    if (!Number.isInteger(grams) || grams <= 0) throw new Error('Peso non valido');
+    return grams;
+  }
+
+  function pricePerKg(price, weightGrams) {
+    const numericPrice = parsePrice(price);
+    const grams = normalizeWeight(weightGrams, true);
+    return Math.round((numericPrice * 1000 / grams) * 100) / 100;
+  }
+
   function normalizeHistoricalRows(rows) {
     return rows.map((row, index) => {
       const offerDate = deriveOfferDate(row.expiryDate);
+      const price = parsePrice(row.price);
       return {
         ...row,
         id: `historic-${row.sourceRow ?? index + 1}`,
         offerDate,
         ...periodFields(offerDate),
+        mode: 'taglio',
+        weightGrams: null,
+        variantId: null,
+        comparisonPrice: price,
         origin: 'historical',
         isUser: false
       };
@@ -84,12 +112,21 @@
     assertIsoDate(expiryDate, 'Data scadenza');
     if (expiryDate < offerDate) throw new Error('La data di scadenza non può essere precedente alla data offerta');
 
+    const mode = normalizeMode(input.mode);
+    const price = parsePrice(input.price);
+    const weightGrams = normalizeWeight(input.weightGrams, mode === 'vaschetta');
+    const type = mode === 'taglio' ? normalizeText(input.type, 'Tipologia') : String(input.type || '').trim();
+
     return {
       id: id || generateId(),
       supermarket: normalizeText(input.supermarket, 'Supermercato'),
       product: normalizeText(input.product, 'Prodotto'),
-      type: normalizeText(input.type, 'Tipologia'),
-      price: parsePrice(input.price),
+      mode,
+      type,
+      price,
+      weightGrams,
+      variantId: input.variantId ? String(input.variantId) : null,
+      comparisonPrice: mode === 'vaschetta' ? pricePerKg(price, weightGrams) : price,
       expiryDate,
       offerDate,
       ...periodFields(offerDate),
@@ -101,15 +138,17 @@
 
   function validateManualOffer(offer) {
     if (!offer || typeof offer !== 'object') throw new Error('Backup non valido: offerta mancante');
-    const normalized = createManualOffer({
+    return createManualOffer({
       supermarket: offer.supermarket,
       product: offer.product,
+      mode: offer.mode || 'taglio',
       type: offer.type,
       price: offer.price,
+      weightGrams: offer.weightGrams,
+      variantId: offer.variantId,
       expiryDate: offer.expiryDate,
       createdAt: offer.createdAt
     }, offer.offerDate, offer.id);
-    return normalized;
   }
 
   function buildBackup(userOffers, exportedAt) {
@@ -144,6 +183,9 @@
   return {
     deriveOfferDate,
     periodFields,
+    normalizeMode,
+    normalizeWeight,
+    pricePerKg,
     normalizeHistoricalRows,
     createManualOffer,
     buildBackup,

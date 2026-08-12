@@ -631,10 +631,122 @@ tbody tr:last-child td { border-bottom: 0; }
 .combination-toolbar .field { min-width: 0; }
 @media (max-width: 720px) { .combination-toolbar { grid-template-columns: 1fr; } }
 
+/* --- Modalità Taglio / Vaschetta e catalogo visuale --- */
+.mode-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(54, 20, 28, .72);
+  backdrop-filter: blur(14px);
+}
+.mode-gate[hidden] { display: none; }
+.mode-gate-card {
+  width: min(860px, 100%);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 28px;
+  padding: clamp(24px, 4vw, 42px);
+  background: linear-gradient(145deg, rgba(255,253,249,.99), rgba(255,244,239,.98));
+  box-shadow: 0 30px 80px rgba(46, 13, 22, .28);
+}
+.mode-gate-card h2 { margin: 5px 0 8px; color: var(--burgundy); font-size: clamp(30px, 5vw, 46px); letter-spacing: -.04em; }
+.mode-gate-card > p { margin: 0 0 24px; color: var(--muted); }
+.mode-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.mode-choice {
+  min-height: 215px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+  background: rgba(255,255,255,.88);
+  color: var(--text);
+  text-align: left;
+  display: grid;
+  grid-template-columns: 145px minmax(0,1fr);
+  gap: 18px;
+  align-items: center;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.mode-choice:hover, .mode-choice:focus-visible { transform: translateY(-3px); border-color: var(--rose); box-shadow: var(--shadow-strong); outline: none; }
+.mode-choice strong { display: block; color: var(--burgundy); font-size: 21px; margin-bottom: 5px; }
+.mode-choice small { display: block; color: var(--muted); line-height: 1.45; }
+.mode-choice-visual { position: relative; width: 140px; height: 130px; display: block; }
+.mode-choice-taglio span { position: absolute; width: 110px; height: 67px; border-radius: 48% 52% 48% 52%; border: 6px solid var(--fat); background: linear-gradient(145deg, #f5b5b5, var(--ham)); box-shadow: 0 13px 26px rgba(111,38,52,.15); }
+.mode-choice-taglio span:nth-child(1) { top: 10px; left: 8px; transform: rotate(-10deg); }
+.mode-choice-taglio span:nth-child(2) { top: 37px; left: 22px; transform: rotate(10deg); }
+.mode-choice-taglio span:nth-child(3) { top: 60px; left: 4px; transform: rotate(-2deg); }
+.mode-choice-pack { border-radius: 20px; border: 5px solid #ead9cc; background: linear-gradient(145deg,#fff,#f3e9e2); box-shadow: 0 15px 30px rgba(111,38,52,.12); transform: rotate(-3deg); overflow: hidden; }
+.mode-choice-pack::after { content:""; position:absolute; inset: 8px; border: 1px solid rgba(111,38,52,.12); border-radius: 14px; }
+.pack-slice { position:absolute; width: 88px; height: 52px; left: 23px; top: 44px; border-radius: 48% 52%; background: linear-gradient(145deg,#f6b7b8,var(--ham)); border: 5px solid var(--fat); transform: rotate(-7deg); }
+.pack-label { position:absolute; z-index:2; right:10px; bottom:9px; border-radius: 999px; padding:4px 7px; background:var(--burgundy); color:white; font-size:10px; font-weight:800; }
+.mode-switch { display: inline-flex; padding: 3px; border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,.7); }
+.mode-switch button { border: 0; border-radius: 999px; padding: 7px 11px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.mode-switch button.active { background: var(--burgundy); color: white; box-shadow: 0 5px 14px rgba(111,38,52,.16); }
+
+.product-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)); gap: 16px; margin: 18px 0 24px; }
+.product-card { border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); transition: transform .16s ease, box-shadow .16s ease; }
+.product-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-strong); }
+.product-card.selected { border-color: var(--ham); box-shadow: 0 0 0 3px rgba(217,111,120,.12), var(--shadow); }
+.product-card-button { display: block; width: 100%; border: 0; padding: 0; background: transparent; color: inherit; text-align: left; }
+.product-media { height: 170px; display: grid; place-items: center; position: relative; overflow: hidden; background: radial-gradient(circle at 50% 35%, #fff 0, #fff7f1 54%, #f4e5da 100%); }
+.product-media img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+.product-placeholder { width: 110px; height: 76px; border: 6px solid var(--fat); border-radius: 48% 52%; background: linear-gradient(145deg,#f3b4b5,var(--ham)); transform: rotate(-7deg); opacity: .9; }
+.product-card-body { padding: 15px 16px 17px; }
+.brand-line { min-height: 32px; display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; font-weight: 750; }
+.brand-logo { width: 36px; height: 28px; object-fit: contain; border-radius: 8px; background: white; border: 1px solid var(--border); padding: 3px; }
+.product-card h4 { margin: 8px 0 4px; color: var(--burgundy); font-size: 16px; line-height: 1.25; }
+.product-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.product-chip { border-radius: 999px; padding: 4px 8px; background: var(--rose-soft); color: var(--burgundy); font-size: 10px; font-weight: 800; }
+.product-price-line { margin-top: 12px; display:flex; justify-content:space-between; gap:10px; align-items:end; color:var(--muted); font-size:11px; }
+.product-price-line strong { color: var(--text); font-size: 15px; }
+.catalog-media-grid { display:grid; gap:10px; max-height: 340px; overflow:auto; padding-right:4px; }
+.catalog-media-row { display:grid; grid-template-columns: 44px minmax(0,1fr) auto; gap:10px; align-items:center; padding:9px; border:1px solid var(--border); border-radius:13px; background:var(--surface-soft); }
+.catalog-media-row img { width:44px; height:38px; object-fit:contain; border-radius:8px; background:white; }
+.catalog-media-row strong { font-size:12px; display:block; }
+.catalog-media-row small { color:var(--muted); display:block; }
+.catalog-media-row input[type=file] { max-width:170px; font-size:10px; }
+.price-equivalent { color: var(--burgundy); font-weight: 800; }
+.mode-context { display:inline-flex; align-items:center; gap:6px; color:var(--burgundy); background:var(--rose-soft); border-radius:999px; padding:5px 9px; font-size:10px; font-weight:850; }
+
+@media (max-width: 1100px) {
+  .topbar-right { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .mode-switch { order: 2; }
+}
+@media (max-width: 760px) {
+  .mode-choice-grid { grid-template-columns: 1fr; }
+  .mode-choice { min-height: 155px; grid-template-columns: 105px minmax(0,1fr); padding: 17px; }
+  .mode-choice-visual { width: 100px; height: 100px; transform: scale(.78); transform-origin: center; }
+  .mode-choice-pack { transform: rotate(-3deg) scale(.78); }
+  .mode-switch { width: 100%; }
+  .mode-switch button { flex: 1; }
+  .product-card-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .product-media { height: 135px; }
+  .catalog-media-row { grid-template-columns: 38px minmax(0,1fr); }
+  .catalog-media-row input[type=file] { grid-column: 1 / -1; max-width:none; width:100%; }
+}
+
 </style>
 </head>
 <body>
   <div class="ham-pattern" aria-hidden="true"></div>
+  <div id="mode-gate" class="mode-gate" role="dialog" aria-modal="true" aria-labelledby="mode-gate-title">
+    <div class="mode-gate-card">
+      <span class="eyebrow">Prosciutto Cotto Data</span>
+      <h2 id="mode-gate-title">Cosa vuoi consultare?</h2>
+      <p>Scegli il catalogo. Potrai cambiare modalità in qualsiasi momento dalla barra superiore.</p>
+      <div class="mode-choice-grid">
+        <button id="mode-taglio" class="mode-choice" type="button" data-mode="taglio">
+          <span class="mode-choice-visual mode-choice-taglio" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span><strong>Prosciutti al taglio</strong><small>Offerte e confronti con prezzo al kg</small></span>
+        </button>
+        <button id="mode-vaschetta" class="mode-choice" type="button" data-mode="vaschetta">
+          <span class="mode-choice-visual mode-choice-pack" aria-hidden="true"><span class="pack-label">100 g</span><span class="pack-slice"></span></span>
+          <span><strong>Cotti in vaschetta</strong><small>Prezzo confezione, grammatura e confronto €/kg</small></span>
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
@@ -672,6 +784,10 @@ tbody tr:last-child td { border-bottom: 0; }
           <h2 id="page-title">Dashboard</h2>
         </div>
         <div class="topbar-right">
+          <div id="mode-switch" class="mode-switch" aria-label="Modalità catalogo">
+            <button type="button" data-mode-switch="taglio">Al taglio</button>
+            <button type="button" data-mode-switch="vaschetta">In vaschetta</button>
+          </div>
           <div class="data-status" id="storage-status"><span class="status-dot"></span><span>Caricamento dati…</span></div>
           <div class="source" id="source-label"></div>
           <button id="auth-top-button" class="btn btn-soft btn-small" type="button">Area gestione</button>
@@ -779,14 +895,20 @@ tbody tr:last-child td { border-bottom: 0; }
                       <div class="field-label-row"><label for="offer-product">Prosciutto / prodotto</label><button class="inline-link" type="button" data-focus-catalog="product">+ Nuovo prosciutto</button></div>
                       <select id="offer-product" name="product" required></select>
                     </div>
-                    <div class="field">
+                    <div class="field" id="offer-type-field">
                       <label for="offer-type">Tipologia</label>
                       <input id="offer-type" name="type" list="type-options" autocomplete="off" placeholder="Es. Alta Qualità" required />
                       <datalist id="type-options"></datalist>
                     </div>
+                    <div class="field" id="offer-variant-field" hidden>
+                      <label for="offer-variant">Grammatura</label>
+                      <select id="offer-variant" name="variant"></select>
+                      <small>Seleziona il peso della confezione</small>
+                    </div>
                     <div class="field">
-                      <label for="offer-price">Prezzo (€)</label>
+                      <label for="offer-price" id="offer-price-label">Prezzo (€ / kg)</label>
                       <input id="offer-price" name="price" type="text" inputmode="decimal" placeholder="Es. 12,90" required />
+                      <small id="offer-price-equivalent"></small>
                     </div>
                     <div class="field">
                       <label for="offer-date">Data offerta</label>
@@ -814,11 +936,28 @@ tbody tr:last-child td { border-bottom: 0; }
                   <button class="btn btn-soft btn-small" type="submit">Aggiungi supermercato</button>
                 </form>
                 <div class="catalog-divider"></div>
+                <form id="brand-form" class="catalog-form">
+                  <div class="field"><label for="brand-name">Nuovo marchio</label><input id="brand-name" type="text" placeholder="Es. Rovagnati" required /></div>
+                  <div class="field"><label for="brand-logo">Logo marchio</label><input id="brand-logo" type="file" accept="image/jpeg,image/png,image/webp" /></div>
+                  <button class="btn btn-soft btn-small" type="submit">Aggiungi marchio</button>
+                </form>
+                <div class="catalog-divider"></div>
                 <form id="catalog-product-form" class="catalog-form">
                   <div class="field"><label for="catalog-product-name">Nuovo prosciutto</label><input id="catalog-product-name" type="text" placeholder="Marca - prodotto" required /></div>
-                  <div class="field"><label for="catalog-product-type">Tipologia predefinita</label><input id="catalog-product-type" type="text" list="type-options" placeholder="Es. Alta Qualità" /></div>
+                  <div class="field"><label for="catalog-product-brand">Marchio</label><select id="catalog-product-brand"></select></div>
+                  <div class="field" id="catalog-product-type-field"><label for="catalog-product-type">Tipologia predefinita</label><input id="catalog-product-type" type="text" list="type-options" placeholder="Es. Alta Qualità" /></div>
+                  <div class="field" id="catalog-product-weight-field" hidden><label for="catalog-product-weight">Prima grammatura (g)</label><input id="catalog-product-weight" type="number" min="1" step="1" placeholder="Es. 100" /></div>
+                  <div class="field"><label for="catalog-product-image">Immagine prodotto</label><input id="catalog-product-image" type="file" accept="image/jpeg,image/png,image/webp" /></div>
                   <button class="btn btn-soft btn-small" type="submit">Aggiungi prosciutto</button>
                 </form>
+                <div class="catalog-divider"></div>
+                <form id="variant-form" class="catalog-form" hidden>
+                  <div class="field"><label for="variant-product">Prodotto vaschetta</label><select id="variant-product"></select></div>
+                  <div class="field"><label for="variant-weight">Nuova grammatura (g)</label><input id="variant-weight" type="number" min="1" step="1" placeholder="Es. 120" required /></div>
+                  <button class="btn btn-soft btn-small" type="submit">Aggiungi grammatura</button>
+                </form>
+                <div class="catalog-divider"></div>
+                <div id="catalog-media-grid" class="catalog-media-grid"></div>
                 <div class="catalog-divider"></div>
                 <div class="backup-actions compact-backup">
                   <button id="export-backup" class="backup-action"><span>↓</span><div><strong>Esporta JSON</strong><small>Backup completo dell’archivio corrente</small></div></button>
@@ -936,6 +1075,7 @@ tbody tr:last-child td { border-bottom: 0; }
           <div class="toolbar toolbar-panel">
             <div class="field"><label for="product-select">Prodotto</label><select id="product-select"></select></div>
           </div>
+          <div id="product-card-grid" class="product-card-grid"></div>
           <div id="product-detail"></div>
           <div class="grid-2">
             <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Top 5 supermercati</h4><p class="panel-subtitle">Rank denso, pari merito inclusi</p></div></div><div id="product-supermarkets-chart" class="chart"></div></div>
@@ -972,7 +1112,7 @@ tbody tr:last-child td { border-bottom: 0; }
               <div class="field"><label for="filter-query">Ricerca</label><input id="filter-query" type="search" placeholder="Prodotto, supermercato…" /></div>
               <div class="field"><label for="filter-supermarket">Supermercato</label><select id="filter-supermarket"></select></div>
               <div class="field"><label for="filter-product">Prodotto</label><select id="filter-product"></select></div>
-              <div class="field"><label for="filter-type">Tipologia</label><select id="filter-type"></select></div>
+              <div class="field" id="filter-type-field"><label for="filter-type">Tipologia</label><select id="filter-type"></select></div>
               <div class="field"><label for="filter-month">Mese offerta</label><select id="filter-month"></select></div>
               <div class="field"><label for="filter-origin">Origine</label><select id="filter-origin"><option value="">Tutte</option><option value="historical">Storico</option><option value="manual">Inserita</option></select></div>
               <div class="field"><label for="filter-sort">Ordina per data</label><select id="filter-sort"><option value="offerDateDesc">Data offerta — più recente</option><option value="offerDateAsc">Data offerta — meno recente</option><option value="expiryDateDesc">Data scadenza — più recente</option><option value="expiryDateAsc">Data scadenza — meno recente</option></select></div>
@@ -1000,6 +1140,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
   'use strict';
 
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const MODES = ['taglio', 'vaschetta'];
 
   function assertIsoDate(value, label = 'Data') {
     if (!ISO_DATE.test(String(value || ''))) throw new Error(`${label} non valida`);
@@ -1040,14 +1181,41 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     };
   }
 
+  function normalizeMode(value) {
+    const mode = String(value || 'taglio').trim().toLocaleLowerCase('it');
+    if (!MODES.includes(mode)) throw new Error('Modalità prodotto non valida');
+    return mode;
+  }
+
+  function normalizeWeight(value, required = false) {
+    if (value === null || value === undefined || String(value).trim() === '') {
+      if (required) throw new Error('Peso obbligatorio per i cotti in vaschetta');
+      return null;
+    }
+    const grams = Number(value);
+    if (!Number.isInteger(grams) || grams <= 0) throw new Error('Peso non valido');
+    return grams;
+  }
+
+  function pricePerKg(price, weightGrams) {
+    const numericPrice = parsePrice(price);
+    const grams = normalizeWeight(weightGrams, true);
+    return Math.round((numericPrice * 1000 / grams) * 100) / 100;
+  }
+
   function normalizeHistoricalRows(rows) {
     return rows.map((row, index) => {
       const offerDate = deriveOfferDate(row.expiryDate);
+      const price = parsePrice(row.price);
       return {
         ...row,
         id: `historic-${row.sourceRow ?? index + 1}`,
         offerDate,
         ...periodFields(offerDate),
+        mode: 'taglio',
+        weightGrams: null,
+        variantId: null,
+        comparisonPrice: price,
         origin: 'historical',
         isUser: false
       };
@@ -1078,12 +1246,21 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     assertIsoDate(expiryDate, 'Data scadenza');
     if (expiryDate < offerDate) throw new Error('La data di scadenza non può essere precedente alla data offerta');
 
+    const mode = normalizeMode(input.mode);
+    const price = parsePrice(input.price);
+    const weightGrams = normalizeWeight(input.weightGrams, mode === 'vaschetta');
+    const type = mode === 'taglio' ? normalizeText(input.type, 'Tipologia') : String(input.type || '').trim();
+
     return {
       id: id || generateId(),
       supermarket: normalizeText(input.supermarket, 'Supermercato'),
       product: normalizeText(input.product, 'Prodotto'),
-      type: normalizeText(input.type, 'Tipologia'),
-      price: parsePrice(input.price),
+      mode,
+      type,
+      price,
+      weightGrams,
+      variantId: input.variantId ? String(input.variantId) : null,
+      comparisonPrice: mode === 'vaschetta' ? pricePerKg(price, weightGrams) : price,
       expiryDate,
       offerDate,
       ...periodFields(offerDate),
@@ -1095,15 +1272,17 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
 
   function validateManualOffer(offer) {
     if (!offer || typeof offer !== 'object') throw new Error('Backup non valido: offerta mancante');
-    const normalized = createManualOffer({
+    return createManualOffer({
       supermarket: offer.supermarket,
       product: offer.product,
+      mode: offer.mode || 'taglio',
       type: offer.type,
       price: offer.price,
+      weightGrams: offer.weightGrams,
+      variantId: offer.variantId,
       expiryDate: offer.expiryDate,
       createdAt: offer.createdAt
     }, offer.offerDate, offer.id);
-    return normalized;
   }
 
   function buildBackup(userOffers, exportedAt) {
@@ -1138,6 +1317,9 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
   return {
     deriveOfferDate,
     periodFields,
+    normalizeMode,
+    normalizeWeight,
+    pricePerKg,
     normalizeHistoricalRows,
     createManualOffer,
     buildBackup,
@@ -1157,6 +1339,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
   'use strict';
 
   const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  const priceOf = (row) => Number.isFinite(Number(row?.comparisonPrice)) ? Number(row.comparisonPrice) : Number(row?.price || 0);
 
   function median(values) {
     if (!values.length) return 0;
@@ -1198,7 +1381,8 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
 
   function aggregateEntity(rows, entityKey, relatedKey) {
     return [...groupBy(rows, entityKey).entries()].map(([name, entityRows]) => {
-      const prices = entityRows.map((row) => row.price);
+      const prices = entityRows.map(priceOf);
+      const packagePrices = entityRows.map((row) => Number(row.price || 0));
       const expiryDates = entityRows.map((row) => row.expiryDate).sort();
       const related = new Set(entityRows.map((row) => row[relatedKey]));
       const types = [...new Set(entityRows.map((row) => row.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'it'));
@@ -1211,6 +1395,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
         minPrice: Math.min(...prices),
         maxPrice: Math.max(...prices),
         stdDev: standardDeviation(prices),
+        averagePackagePrice: average(packagePrices),
         firstExpiry: expiryDates[0],
         lastExpiry: expiryDates[expiryDates.length - 1],
         types
@@ -1231,7 +1416,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
   function monthlyStats(rows) {
     return [...groupBy(rows, 'month').entries()]
       .map(([month, monthRows]) => {
-        const prices = monthRows.map((row) => row.price);
+        const prices = monthRows.map(priceOf);
         return {
           month,
           count: monthRows.length,
@@ -1249,7 +1434,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
   function quarterlyStats(rows) {
     return [...groupBy(rows, 'quarter').entries()]
       .map(([quarter, quarterRows]) => {
-        const prices = quarterRows.map((row) => row.price);
+        const prices = quarterRows.map(priceOf);
         return {
           quarter,
           count: quarterRows.length,
@@ -1269,7 +1454,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     return [...groupBy(rows, 'year').entries()]
       .filter(([year]) => Boolean(year))
       .map(([year, yearRows]) => {
-        const prices = yearRows.map((row) => row.price);
+        const prices = yearRows.map(priceOf);
         return {
           year,
           count: yearRows.length,
@@ -1292,6 +1477,45 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     assertGranularity(granularity);
     return [...new Set(rows.map((row) => row[granularity]).filter(Boolean))]
       .sort((a, b) => String(b).localeCompare(String(a)));
+  }
+
+  function periodKeysThroughDate(rows, granularity, currentDate) {
+    assertGranularity(granularity);
+    const existing = periodKeys(rows, granularity);
+    if (!existing.length) return [];
+    const current = /^\d{4}-\d{2}-\d{2}$/.test(String(currentDate || '')) ? String(currentDate) : new Date().toISOString().slice(0, 10);
+    const earliestOffer = [...rows].map((row) => row.offerDate).filter(Boolean).sort()[0];
+    const latestOffer = [...rows].map((row) => row.offerDate).filter(Boolean).sort().slice(-1)[0];
+    const start = earliestOffer || `${existing[existing.length - 1].slice(0, 4)}-01-01`;
+    const end = latestOffer && latestOffer > current ? latestOffer : current;
+    const startYear = Number(start.slice(0, 4));
+    const startMonth = Number(start.slice(5, 7) || 1);
+    const endYear = Number(end.slice(0, 4));
+    const endMonth = Number(end.slice(5, 7) || 1);
+    const keys = [];
+    if (granularity === 'year') {
+      for (let year = endYear; year >= startYear; year -= 1) keys.push(String(year));
+      return keys;
+    }
+    if (granularity === 'month') {
+      let year = endYear;
+      let month = endMonth;
+      while (year > startYear || (year === startYear && month >= startMonth)) {
+        keys.push(`${year}-${String(month).padStart(2, '0')}`);
+        month -= 1;
+        if (month === 0) { month = 12; year -= 1; }
+      }
+      return keys;
+    }
+    let year = endYear;
+    let quarter = Math.floor((endMonth - 1) / 3) + 1;
+    const startQuarter = Math.floor((startMonth - 1) / 3) + 1;
+    while (year > startYear || (year === startYear && quarter >= startQuarter)) {
+      keys.push(`${year}-Q${quarter}`);
+      quarter -= 1;
+      if (quarter === 0) { quarter = 4; year -= 1; }
+    }
+    return keys;
   }
 
   function rowsForPeriod(rows, granularity, key) {
@@ -1323,7 +1547,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     if (!subset.length) {
       return { key, count: 0, products: 0, supermarkets: 0, averagePrice: 0, medianPrice: 0, minPrice: 0, maxPrice: 0 };
     }
-    const prices = subset.map((row) => row.price);
+    const prices = subset.map(priceOf);
     return {
       key,
       count: subset.length,
@@ -1343,7 +1567,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       .map(([groupKey, groupRows]) => ({
         key: groupKey,
         count: groupRows.length,
-        averagePrice: average(groupRows.map((row) => row.price))
+        averagePrice: average(groupRows.map(priceOf))
       }))
       .sort((a, b) => a.key.localeCompare(b.key));
   }
@@ -1354,10 +1578,10 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
         type,
         count: typeRows.length,
         share: typeRows.length / rows.length,
-        averagePrice: average(typeRows.map((row) => row.price)),
-        medianPrice: median(typeRows.map((row) => row.price)),
-        minPrice: Math.min(...typeRows.map((row) => row.price)),
-        maxPrice: Math.max(...typeRows.map((row) => row.price))
+        averagePrice: average(typeRows.map(priceOf)),
+        medianPrice: median(typeRows.map(priceOf)),
+        minPrice: Math.min(...typeRows.map(priceOf)),
+        maxPrice: Math.max(...typeRows.map(priceOf))
       }))
       .sort((a, b) => b.count - a.count);
   }
@@ -1366,7 +1590,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     return [...groupBy(rows.filter((row) => row.product === product), 'month').entries()]
       .map(([month, monthRows]) => ({
         month,
-        averagePrice: average(monthRows.map((row) => row.price)),
+        averagePrice: average(monthRows.map(priceOf)),
         count: monthRows.length
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
@@ -1378,7 +1602,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       name,
       count: itemRows.length,
       share: subset.length ? itemRows.length / subset.length : 0,
-      averagePrice: average(itemRows.map((row) => row.price))
+      averagePrice: average(itemRows.map(priceOf))
     }));
     return denseRank(entries, 'count', maxRank);
   }
@@ -1389,7 +1613,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       name,
       count: itemRows.length,
       share: subset.length ? itemRows.length / subset.length : 0,
-      averagePrice: average(itemRows.map((row) => row.price))
+      averagePrice: average(itemRows.map(priceOf))
     }));
     return denseRank(entries, 'count', maxRank);
   }
@@ -1397,7 +1621,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
   function summarize(rows) {
     const products = productStats(rows);
     const supermarkets = supermarketStats(rows);
-    const prices = rows.map((row) => row.price);
+    const prices = rows.map(priceOf);
     const top5Count = products.slice(0, 5).reduce((sum, product) => sum + product.count, 0);
     const top10Count = products.slice(0, 10).reduce((sum, product) => sum + product.count, 0);
     const productByAverage = [...products].sort((a, b) => b.averagePrice - a.averagePrice);
@@ -1408,14 +1632,14 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       supermarkets: supermarkets.length,
       averagePrice: average(prices),
       medianPrice: median(prices),
-      minPrice: Math.min(...prices),
-      maxPrice: Math.max(...prices),
-      top5Share: top5Count / rows.length,
-      top10Share: top10Count / rows.length,
+      minPrice: prices.length ? Math.min(...prices) : 0,
+      maxPrice: prices.length ? Math.max(...prices) : 0,
+      top5Share: rows.length ? top5Count / rows.length : 0,
+      top10Share: rows.length ? top10Count / rows.length : 0,
       topProducts: products.slice(0, 10),
-      highestAverageProduct: productByAverage[0],
-      highestAverageSupermarket: supermarketByAverage[0],
-      lowestAverageSupermarket: supermarketByAverage[supermarketByAverage.length - 1],
+      highestAverageProduct: productByAverage[0] || null,
+      highestAverageSupermarket: supermarketByAverage[0] || null,
+      lowestAverageSupermarket: supermarketByAverage[supermarketByAverage.length - 1] || null,
       simpleProductAverage: average(products.map((item) => item.averagePrice)),
       simpleSupermarketAverage: average(supermarkets.map((item) => item.averagePrice))
     };
@@ -1574,7 +1798,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       };
     }
 
-    const prices = subset.map((row) => Number(row.price));
+    const prices = subset.map(priceOf);
     const latest = subset[subset.length - 1];
     const previous = subset.length > 1 ? subset[subset.length - 2] : null;
     const intervals = subset.slice(1).map((row, index) => isoDayDiff(subset[index].offerDate, row.offerDate));
@@ -1585,8 +1809,8 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     const year = current.slice(0, 4);
     const monthNumber = Number(current.slice(5, 7));
     const quarter = `${year}-Q${Math.floor((monthNumber - 1) / 3) + 1}`;
-    const priceDelta = previous ? Number(latest.price) - Number(previous.price) : null;
-    const priceDeltaPct = previous && Number(previous.price) !== 0 ? priceDelta / Number(previous.price) : null;
+    const priceDelta = previous ? priceOf(latest) - priceOf(previous) : null;
+    const priceDeltaPct = previous && priceOf(previous) !== 0 ? priceDelta / priceOf(previous) : null;
 
     return {
       supermarket,
@@ -1595,8 +1819,10 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       averagePrice: average(prices),
       minPrice: Math.min(...prices),
       maxPrice: Math.max(...prices),
-      lastPrice: Number(latest.price),
-      previousPrice: previous ? Number(previous.price) : null,
+      lastPrice: priceOf(latest),
+      lastPackagePrice: Number(latest.price),
+      averagePackagePrice: average(subset.map((row) => Number(row.price || 0))),
+      previousPrice: previous ? priceOf(previous) : null,
       priceDelta,
       priceDeltaPct,
       lastOfferDate: latest.offerDate,
@@ -1613,7 +1839,9 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
       trend: subset.map((row) => ({
         offerDate: row.offerDate,
         expiryDate: row.expiryDate || '',
-        price: Number(row.price),
+        price: priceOf(row),
+        packagePrice: Number(row.price),
+        weightGrams: row.weightGrams || null,
         type: row.type || ''
       }))
     };
@@ -1646,6 +1874,7 @@ window.CDP_DATA = {"meta":{"title":"CDP — Gestionale offerte prosciutto cotto"
     quarterlyStats,
     yearlyStats,
     periodKeys,
+    periodKeysThroughDate,
     rowsForPeriod,
     previousPeriodKey,
     periodSummary,
@@ -1813,12 +2042,7 @@ window.CDP_CONFIG = {
     if (!match) throw new Error('Data offerta non valida');
     const year = Number(match[1]);
     const month = Number(match[2]);
-    const quarter = Math.floor((month - 1) / 3) + 1;
-    return {
-      month: `${year}-${String(month).padStart(2, '0')}`,
-      quarter: `${year}-Q${quarter}`,
-      year: String(year)
-    };
+    return { month: `${year}-${String(month).padStart(2, '0')}`, quarter: `${year}-Q${Math.floor((month - 1) / 3) + 1}`, year: String(year) };
   }
 
   function isConfigured(candidate = config) {
@@ -1833,9 +2057,7 @@ window.CDP_CONFIG = {
     config = nextConfig || root.CDP_CONFIG || {};
     client = null;
     if (isConfigured(config) && root.supabase && typeof root.supabase.createClient === 'function') {
-      client = root.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
-        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-      });
+      client = root.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     }
     return { configured: isConfigured(config), sdkAvailable: !!(root.supabase && root.supabase.createClient), client };
   }
@@ -1847,24 +2069,34 @@ window.CDP_CONFIG = {
     return client;
   }
 
-  function relationValue(value) {
-    return Array.isArray(value) ? value[0] : value;
-  }
+  function relationValue(value) { return Array.isArray(value) ? value[0] : value; }
 
   function normalizeOfferRow(row) {
     const supermarket = relationValue(row.supermarket || row.supermarkets) || {};
     const product = relationValue(row.product || row.products) || {};
+    const variant = relationValue(row.variant || row.product_variants) || {};
+    const brand = relationValue(product.brand || product.brands) || {};
     const offerDate = row.offer_date || row.offerDate;
     const expiryDate = row.expiry_date || row.expiryDate;
     const origin = row.source || row.origin || 'manual';
+    const mode = String(product.mode || row.mode || 'taglio');
+    const price = Number(row.price);
+    const weightGrams = variant.weight_grams == null ? null : Number(variant.weight_grams);
+    const comparisonPrice = mode === 'vaschetta' && weightGrams ? Math.round((price * 1000 / weightGrams) * 100) / 100 : price;
     return {
       id: String(row.id),
       supermarketId: supermarket.id ? String(supermarket.id) : String(row.supermarket_id || row.supermarketId || ''),
       productId: product.id ? String(product.id) : String(row.product_id || row.productId || ''),
+      variantId: variant.id ? String(variant.id) : (row.variant_id ? String(row.variant_id) : null),
       supermarket: supermarket.name || row.supermarket || '',
       product: product.name || row.product || '',
+      mode,
       type: row.type || product.default_type || '',
-      price: Number(row.price),
+      price,
+      weightGrams,
+      comparisonPrice,
+      brand: brand.id ? { id: String(brand.id), name: brand.name || '', logo_path: brand.logo_path || '' } : null,
+      productImagePath: product.image_path || '',
       offerDate,
       expiryDate,
       ...periodFields(offerDate),
@@ -1874,7 +2106,7 @@ window.CDP_CONFIG = {
     };
   }
 
-  const OFFER_SELECT = 'id,type,price,offer_date,expiry_date,source,created_at,supermarket:supermarkets(id,name),product:products(id,name,default_type)';
+  const OFFER_SELECT = 'id,type,price,offer_date,expiry_date,source,created_at,supermarket:supermarkets(id,name),product:products(id,name,default_type,mode,image_path,brand_id,brand:brands(id,name,logo_path)),variant:product_variants(id,weight_grams)';
 
   async function loadDataset() {
     const { data, error } = await getClient().from('offers').select(OFFER_SELECT).order('offer_date', { ascending: true });
@@ -1884,43 +2116,27 @@ window.CDP_CONFIG = {
 
   async function loadCatalogs() {
     const db = getClient();
-    const [supermarketsResult, productsResult] = await Promise.all([
+    const [supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
       db.from('supermarkets').select('id,name').order('name', { ascending: true }),
-      db.from('products').select('id,name,default_type').order('name', { ascending: true })
+      db.from('products').select('id,name,default_type,mode,brand_id,image_path,brand:brands(id,name,logo_path)').order('name', { ascending: true }),
+      db.from('brands').select('id,name,slug,logo_path').order('name', { ascending: true }),
+      db.from('product_variants').select('id,product_id,weight_grams').order('weight_grams', { ascending: true })
     ]);
-    if (supermarketsResult.error) throw supermarketsResult.error;
-    if (productsResult.error) throw productsResult.error;
-    return { supermarkets: supermarketsResult.data || [], products: productsResult.data || [] };
+    for (const result of [supermarketsResult, productsResult, brandsResult, variantsResult]) if (result.error) throw result.error;
+    return { supermarkets: supermarketsResult.data || [], products: productsResult.data || [], brands: brandsResult.data || [], variants: variantsResult.data || [] };
   }
 
-  async function getSession() {
-    const { data, error } = await getClient().auth.getSession();
-    if (error) throw error;
-    return data?.session || null;
-  }
-
-  async function signIn(email, password) {
-    const { data, error } = await getClient().auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') });
-    if (error) throw error;
-    return data?.session || null;
-  }
-
-  async function signOut() {
-    const { error } = await getClient().auth.signOut();
-    if (error) throw error;
-  }
-
-  async function isAdmin() {
-    const { data, error } = await getClient().rpc('is_admin');
-    if (error) throw error;
-    return data === true;
-  }
+  async function getSession() { const { data, error } = await getClient().auth.getSession(); if (error) throw error; return data?.session || null; }
+  async function signIn(email, password) { const { data, error } = await getClient().auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') }); if (error) throw error; return data?.session || null; }
+  async function signOut() { const { error } = await getClient().auth.signOut(); if (error) throw error; }
+  async function isAdmin() { const { data, error } = await getClient().rpc('is_admin'); if (error) throw error; return data === true; }
 
   async function addOffer(input) {
     const payload = {
       supermarket_id: input.supermarketId,
       product_id: input.productId,
-      type: String(input.type || '').trim(),
+      variant_id: input.variantId || null,
+      type: String(input.type || '').trim() || null,
       price: Number(input.price),
       offer_date: input.offerDate,
       expiry_date: input.expiryDate,
@@ -1931,10 +2147,7 @@ window.CDP_CONFIG = {
     return normalizeOfferRow(data);
   }
 
-  async function deleteOffer(id) {
-    const { error } = await getClient().from('offers').delete().eq('id', id);
-    if (error) throw error;
-  }
+  async function deleteOffer(id) { const { error } = await getClient().from('offers').delete().eq('id', id); if (error) throw error; }
 
   async function addSupermarket(name) {
     const normalized = String(name || '').trim();
@@ -1944,22 +2157,88 @@ window.CDP_CONFIG = {
     return data;
   }
 
-  async function addProduct(name, defaultType) {
+  async function addBrand(name) {
     const normalized = String(name || '').trim();
-    if (!normalized) throw new Error('Nome prosciutto obbligatorio');
-    const { data, error } = await getClient().from('products').insert({ name: normalized, default_type: String(defaultType || '').trim() || null }).select('id,name,default_type').single();
+    if (!normalized) throw new Error('Nome marchio obbligatorio');
+    const { data, error } = await getClient().from('brands').insert({ name: normalized }).select('id,name,slug,logo_path').single();
     if (error) throw error;
     return data;
+  }
+
+  async function addProduct(name, defaultType, options = {}) {
+    const normalized = String(name || '').trim();
+    if (!normalized) throw new Error('Nome prosciutto obbligatorio');
+    const payload = {
+      name: normalized,
+      default_type: String(defaultType || '').trim() || null,
+      mode: options.mode || 'taglio',
+      brand_id: options.brandId || null
+    };
+    const { data, error } = await getClient().from('products').insert(payload).select('id,name,default_type,mode,brand_id,image_path').single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function updateProduct(id, patch = {}) {
+    const payload = {};
+    if (Object.prototype.hasOwnProperty.call(patch, 'brandId')) payload.brand_id = patch.brandId || null;
+    if (Object.prototype.hasOwnProperty.call(patch, 'imagePath')) payload.image_path = patch.imagePath || null;
+    if (Object.prototype.hasOwnProperty.call(patch, 'defaultType')) payload.default_type = String(patch.defaultType || '').trim() || null;
+    const { data, error } = await getClient().from('products').update(payload).eq('id', id).select('id,name,default_type,mode,brand_id,image_path').single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function addVariant(productId, weightGrams) {
+    const weight = Number(weightGrams);
+    if (!Number.isInteger(weight) || weight <= 0) throw new Error('Peso non valido');
+    const { data, error } = await getClient().from('product_variants').insert({ product_id: productId, weight_grams: weight }).select('id,product_id,weight_grams').single();
+    if (error) throw error;
+    return data;
+  }
+
+  function safeFileName(file) {
+    const raw = String(file?.name || 'image').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+    return raw || 'image';
+  }
+
+  async function uploadFile(bucket, ownerId, file) {
+    if (!file) throw new Error('Seleziona una immagine');
+    if (!/^image\/(jpeg|png|webp)$/i.test(String(file.type || ''))) throw new Error('Formato immagine non supportato');
+    if (Number(file.size || 0) > 3 * 1024 * 1024) throw new Error('Immagine troppo grande: massimo 3 MB');
+    const path = `${ownerId}/${Date.now()}-${safeFileName(file)}`;
+    const { error } = await getClient().storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
+    if (error) throw error;
+    return path;
+  }
+
+  async function uploadBrandLogo(brandId, file) {
+    const path = await uploadFile('brand-logos', brandId, file);
+    const { data, error } = await getClient().from('brands').update({ logo_path: path }).eq('id', brandId).select('id,name,slug,logo_path').single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function uploadProductImage(productId, file) {
+    const path = await uploadFile('product-images', productId, file);
+    return updateProduct(productId, { imagePath: path });
+  }
+
+  function publicAssetUrl(bucket, path) {
+    if (!path) return '';
+    if (/^data:image\//i.test(String(path))) return String(path);
+    const { data } = getClient().storage.from(bucket).getPublicUrl(path);
+    return data?.publicUrl || '';
   }
 
   function subscribe(onChange) {
     const db = getClient();
     unsubscribe();
-    const channel = db.channel(`cdp-live-${Date.now()}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'supermarkets' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, onChange)
-      .subscribe();
+    let channel = db.channel(`cdp-live-${Date.now()}`);
+    ['offers', 'supermarkets', 'products', 'brands', 'product_variants'].forEach((table) => {
+      channel = channel.on('postgres_changes', { event: '*', schema: 'public', table }, onChange);
+    });
+    channel.subscribe();
     subscriptions = [channel];
     return () => unsubscribe();
   }
@@ -1971,21 +2250,11 @@ window.CDP_CONFIG = {
   }
 
   return {
-    isConfigured,
-    configure,
-    normalizeOfferRow,
-    loadDataset,
-    loadCatalogs,
-    getSession,
-    signIn,
-    signOut,
-    isAdmin,
-    addOffer,
-    deleteOffer,
-    addSupermarket,
-    addProduct,
-    subscribe,
-    unsubscribe
+    isConfigured, configure, normalizeOfferRow, loadDataset, loadCatalogs,
+    getSession, signIn, signOut, isAdmin,
+    addOffer, deleteOffer, addSupermarket, addBrand, addProduct, updateProduct, addVariant,
+    uploadBrandLogo, uploadProductImage, publicAssetUrl,
+    subscribe, unsubscribe
   };
 });
 
@@ -2021,13 +2290,17 @@ window.CDP_CONFIG = {
     }
   }
 
-  function writeJson(key, value) {
-    storage().setItem(key, JSON.stringify(value));
-  }
+  function writeJson(key, value) { storage().setItem(key, JSON.stringify(value)); }
 
   function id(prefix) {
     if (root.crypto && typeof root.crypto.randomUUID === 'function') return `${prefix}-${root.crypto.randomUUID()}`;
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function modeOf(value) {
+    const mode = String(value || 'taglio').trim().toLowerCase();
+    if (!['taglio', 'vaschetta'].includes(mode)) throw new Error('Modalità prodotto non valida');
+    return mode;
   }
 
   function isLocalEnvironment(locationLike = root.location || {}) {
@@ -2045,25 +2318,38 @@ window.CDP_CONFIG = {
 
   function loadOffers() {
     const offers = readJson(OFFERS_KEY, []);
-    return Array.isArray(offers) ? offers : [];
+    if (!Array.isArray(offers)) return [];
+    return offers.map((offer) => ({
+      ...offer,
+      mode: modeOf(offer.mode || 'taglio'),
+      weightGrams: offer.weightGrams == null ? null : Number(offer.weightGrams),
+      comparisonPrice: Number(offer.comparisonPrice || offer.price || 0)
+    }));
   }
 
-  function saveOffers(offers) {
-    writeJson(OFFERS_KEY, Array.isArray(offers) ? offers : []);
-  }
+  function saveOffers(offers) { writeJson(OFFERS_KEY, Array.isArray(offers) ? offers : []); }
 
   function loadCatalogExtras() {
-    const catalogs = readJson(CATALOGS_KEY, { supermarkets: [], products: [] });
+    const catalogs = readJson(CATALOGS_KEY, { supermarkets: [], products: [], brands: [], variants: [] });
     return {
       supermarkets: Array.isArray(catalogs?.supermarkets) ? catalogs.supermarkets : [],
-      products: Array.isArray(catalogs?.products) ? catalogs.products : []
+      products: Array.isArray(catalogs?.products) ? catalogs.products.map((item) => ({
+        ...item,
+        mode: modeOf(item.mode || 'taglio'),
+        brand_id: item.brand_id || item.brandId || null,
+        image_path: item.image_path || item.imagePath || ''
+      })) : [],
+      brands: Array.isArray(catalogs?.brands) ? catalogs.brands : [],
+      variants: Array.isArray(catalogs?.variants) ? catalogs.variants.map((item) => ({ ...item, weight_grams: Number(item.weight_grams || item.weightGrams) })) : []
     };
   }
 
   function saveCatalogExtras(catalogs) {
     writeJson(CATALOGS_KEY, {
       supermarkets: Array.isArray(catalogs?.supermarkets) ? catalogs.supermarkets : [],
-      products: Array.isArray(catalogs?.products) ? catalogs.products : []
+      products: Array.isArray(catalogs?.products) ? catalogs.products : [],
+      brands: Array.isArray(catalogs?.brands) ? catalogs.brands : [],
+      variants: Array.isArray(catalogs?.variants) ? catalogs.variants : []
     });
   }
 
@@ -2079,16 +2365,78 @@ window.CDP_CONFIG = {
     return created;
   }
 
-  function addProduct(name, defaultType) {
+  function addBrand(name) {
+    const normalized = String(name || '').trim();
+    if (!normalized) throw new Error('Nome marchio obbligatorio');
+    const catalogs = loadCatalogExtras();
+    const duplicate = catalogs.brands.find((item) => item.name.toLocaleLowerCase('it') === normalized.toLocaleLowerCase('it'));
+    if (duplicate) return duplicate;
+    const created = { id: id('local-brand'), name: normalized, logo_path: '' };
+    catalogs.brands.push(created);
+    saveCatalogExtras(catalogs);
+    return created;
+  }
+
+  function addProduct(name, defaultType, options = {}) {
     const normalized = String(name || '').trim();
     if (!normalized) throw new Error('Nome prosciutto obbligatorio');
+    const mode = modeOf(options.mode || 'taglio');
     const catalogs = loadCatalogExtras();
-    const duplicate = catalogs.products.find((item) => item.name.toLocaleLowerCase('it') === normalized.toLocaleLowerCase('it'));
+    const duplicate = catalogs.products.find((item) => item.mode === mode && item.name.toLocaleLowerCase('it') === normalized.toLocaleLowerCase('it'));
     if (duplicate) return duplicate;
-    const created = { id: id('local-product'), name: normalized, default_type: String(defaultType || '').trim() || '' };
+    const created = {
+      id: id('local-product'),
+      name: normalized,
+      default_type: String(defaultType || '').trim() || '',
+      mode,
+      brand_id: options.brandId || null,
+      image_path: options.imagePath || ''
+    };
     catalogs.products.push(created);
     saveCatalogExtras(catalogs);
     return created;
+  }
+
+  function addVariant(productId, weightGrams) {
+    const product = String(productId || '').trim();
+    const weight = Number(weightGrams);
+    if (!product) throw new Error('Prodotto obbligatorio');
+    if (!Number.isInteger(weight) || weight <= 0) throw new Error('Peso non valido');
+    const catalogs = loadCatalogExtras();
+    const duplicate = catalogs.variants.find((item) => String(item.product_id) === product && Number(item.weight_grams) === weight);
+    if (duplicate) return duplicate;
+    const created = { id: id('local-variant'), product_id: product, weight_grams: weight };
+    catalogs.variants.push(created);
+    saveCatalogExtras(catalogs);
+    return created;
+  }
+
+  function setBrandLogo(brandId, dataUrl) {
+    const catalogs = loadCatalogExtras();
+    const brand = catalogs.brands.find((item) => String(item.id) === String(brandId));
+    if (!brand) throw new Error('Marchio non trovato');
+    brand.logo_path = String(dataUrl || '');
+    saveCatalogExtras(catalogs);
+    return brand;
+  }
+
+  function setProductImage(productId, dataUrl) {
+    const catalogs = loadCatalogExtras();
+    const product = catalogs.products.find((item) => String(item.id) === String(productId));
+    if (!product) throw new Error('Prodotto non trovato');
+    product.image_path = String(dataUrl || '');
+    saveCatalogExtras(catalogs);
+    return product;
+  }
+
+  function updateProduct(productId, patch = {}) {
+    const catalogs = loadCatalogExtras();
+    const product = catalogs.products.find((item) => String(item.id) === String(productId));
+    if (!product) throw new Error('Prodotto non trovato');
+    if (Object.prototype.hasOwnProperty.call(patch, 'brandId')) product.brand_id = patch.brandId || null;
+    if (Object.prototype.hasOwnProperty.call(patch, 'defaultType')) product.default_type = String(patch.defaultType || '').trim();
+    saveCatalogExtras(catalogs);
+    return product;
   }
 
   function periodFields(offerDate) {
@@ -2096,24 +2444,29 @@ window.CDP_CONFIG = {
     if (!match) throw new Error('Data offerta non valida');
     const year = Number(match[1]);
     const month = Number(match[2]);
-    return {
-      month: `${year}-${String(month).padStart(2, '0')}`,
-      quarter: `${year}-Q${Math.floor((month - 1) / 3) + 1}`,
-      year: String(year)
-    };
+    return { month: `${year}-${String(month).padStart(2, '0')}`, quarter: `${year}-Q${Math.floor((month - 1) / 3) + 1}`, year: String(year) };
   }
 
   function addOffer(input) {
     const offerDate = String(input.offerDate || '').trim();
     const expiryDate = String(input.expiryDate || '').trim();
+    const mode = modeOf(input.mode || 'taglio');
+    const weightGrams = input.weightGrams == null || input.weightGrams === '' ? null : Number(input.weightGrams);
+    if (mode === 'vaschetta' && (!Number.isInteger(weightGrams) || weightGrams <= 0)) throw new Error('Peso obbligatorio per i cotti in vaschetta');
+    const price = Number(input.price);
+    const comparisonPrice = mode === 'vaschetta' ? Math.round((price * 1000 / weightGrams) * 100) / 100 : price;
     const created = {
       id: id('local-offer'),
       supermarketId: String(input.supermarketId || ''),
       productId: String(input.productId || ''),
+      variantId: input.variantId ? String(input.variantId) : null,
       supermarket: String(input.supermarket || '').trim(),
       product: String(input.product || '').trim(),
+      mode,
       type: String(input.type || '').trim(),
-      price: Number(input.price),
+      price,
+      weightGrams,
+      comparisonPrice,
       offerDate,
       expiryDate,
       ...periodFields(offerDate),
@@ -2134,51 +2487,74 @@ window.CDP_CONFIG = {
     return after.length !== before.length;
   }
 
-  function openSession(username) {
-    sessionStorageRef().setItem(SESSION_KEY, JSON.stringify({ username: String(username || '').trim(), openedAt: new Date().toISOString() }));
-  }
-
+  function openSession(username) { sessionStorageRef().setItem(SESSION_KEY, JSON.stringify({ username: String(username || '').trim(), openedAt: new Date().toISOString() })); }
   function sessionUser() {
-    try {
-      const raw = sessionStorageRef().getItem(SESSION_KEY);
-      const parsed = raw ? JSON.parse(raw) : null;
-      return parsed?.username || '';
-    } catch (_) {
-      return '';
-    }
+    try { const raw = sessionStorageRef().getItem(SESSION_KEY); return raw ? (JSON.parse(raw)?.username || '') : ''; } catch (_) { return ''; }
   }
-
-  function hasSession() {
-    return !!sessionUser();
-  }
-
-  function clearSession() {
-    try { sessionStorageRef().removeItem(SESSION_KEY); } catch (_) { /* noop */ }
-  }
-
+  function hasSession() { return !!sessionUser(); }
+  function clearSession() { try { sessionStorageRef().removeItem(SESSION_KEY); } catch (_) { /* noop */ } }
   function clearAll() {
-    try {
-      storage().removeItem(OFFERS_KEY);
-      storage().removeItem(CATALOGS_KEY);
-    } catch (_) { /* noop */ }
+    try { storage().removeItem(OFFERS_KEY); storage().removeItem(CATALOGS_KEY); } catch (_) { /* noop */ }
     clearSession();
   }
 
   return {
-    isLocalEnvironment,
-    authenticate,
-    loadOffers,
-    loadCatalogExtras,
-    addSupermarket,
-    addProduct,
-    addOffer,
-    deleteOffer,
-    openSession,
-    sessionUser,
-    hasSession,
-    clearSession,
-    clearAll
+    isLocalEnvironment, authenticate, loadOffers, loadCatalogExtras,
+    addSupermarket, addBrand, addProduct, addVariant, setBrandLogo, setProductImage, updateProduct,
+    addOffer, deleteOffer, openSession, sessionUser, hasSession, clearSession, clearAll
   };
+});
+
+</script>
+  <script>
+(function (root, factory) {
+  const api = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.CDPModeController = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  function normalizeMode(value) {
+    const mode = String(value || 'taglio').trim().toLowerCase();
+    return mode === 'vaschetta' ? 'vaschetta' : 'taglio';
+  }
+
+  function variantsForProduct(variants, productId) {
+    return (variants || [])
+      .filter((item) => String(item.product_id || item.productId || '') === String(productId || ''))
+      .sort((a, b) => Number(a.weight_grams || a.weightGrams || 0) - Number(b.weight_grams || b.weightGrams || 0));
+  }
+
+  function scope(rows, catalogs, modeValue) {
+    const mode = normalizeMode(modeValue);
+    const products = (catalogs?.products || []).filter((item) => normalizeMode(item.mode) === mode);
+    const ids = new Set(products.map((item) => String(item.id)));
+    return {
+      rows: (rows || []).filter((row) => normalizeMode(row.mode) === mode),
+      catalogs: {
+        supermarkets: [...(catalogs?.supermarkets || [])],
+        products,
+        brands: [...(catalogs?.brands || [])],
+        variants: (catalogs?.variants || []).filter((item) => ids.has(String(item.product_id || item.productId || '')))
+      }
+    };
+  }
+
+  function priceDescriptor(row) {
+    const mode = normalizeMode(row?.mode);
+    const comparison = Number(row?.comparisonPrice ?? row?.price ?? 0);
+    if (mode === 'vaschetta') {
+      return {
+        packagePrice: Number(row?.price || 0),
+        comparisonPrice: comparison,
+        weightGrams: row?.weightGrams == null ? null : Number(row.weightGrams),
+        unit: '€/kg'
+      };
+    }
+    return { packagePrice: null, comparisonPrice: comparison, weightGrams: null, unit: '€/kg' };
+  }
+
+  return { normalizeMode, scope, variantsForProduct, priceDescriptor };
 });
 
 </script>
@@ -2192,8 +2568,9 @@ window.CDP_CONFIG = {
   const Local = window.CDPLocalStore;
   const A = window.CDPAnalytics;
   const C = window.CDPCharts;
+  const MC = window.CDPModeController;
 
-  if (!data || !M || !Cloud || !Local || !A || !C) {
+  if (!data || !M || !Cloud || !Local || !A || !C || !MC) {
     document.body.innerHTML = '<p style="padding:2rem;font-family:sans-serif">Impossibile inizializzare CDP: dati o script mancanti.</p>';
     return;
   }
@@ -2207,10 +2584,16 @@ window.CDP_CONFIG = {
   const monthFmt = new Intl.DateTimeFormat('it-IT', { month: 'short', year: 'numeric' });
   const monthLongFmt = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
 
+  let savedMode = 'taglio';
+  try { savedMode = M.normalizeMode(localStorage.getItem('cdp-mode') || 'taglio'); } catch (_) { savedMode = 'taglio'; }
+
   const state = {
+    mode: savedMode,
     userOffers: [],
+    allRows: historicalRows.slice(),
     rows: historicalRows.slice(),
-    catalogs: { supermarkets: [], products: [] },
+    allCatalogs: { supermarkets: [], products: [], brands: [], variants: [] },
+    catalogs: { supermarkets: [], products: [], brands: [], variants: [] },
     page: 1,
     pageSize: 50,
     liveGranularity: 'month',
@@ -2225,7 +2608,7 @@ window.CDP_CONFIG = {
   };
 
   const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => [...document.querySelectorAll(selector)];
+  const $ = (selector) => [...document.querySelectorAll(selector)];
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -2310,55 +2693,127 @@ window.CDP_CONFIG = {
       : '<span class="origin-badge historical">Storico</span>';
   }
 
+  function modeLabel(mode = state.mode) {
+    return mode === 'vaschetta' ? 'In vaschetta' : 'Al taglio';
+  }
+
+  function isVaschetta() { return state.mode === 'vaschetta'; }
+
   function rebuildRows() {
     state.rows = A.sortRows(state.rows, 'offerDateAsc');
     state.userOffers = state.rows.filter((row) => row.origin !== 'historical');
   }
 
-  function currentAggregates() {
-    const rows = state.rows;
-    return {
-      summary: A.summarize(rows),
-      products: A.productStats(rows),
-      supermarkets: A.supermarketStats(rows),
-      months: A.monthlyStats(rows),
-      quarters: A.quarterlyStats(rows),
-      years: A.yearlyStats(rows),
-      types: A.typeStats(rows)
-    };
+  function applyModeScope() {
+    const scoped = MC.scope(state.allRows, state.allCatalogs, state.mode);
+    state.rows = scoped.rows;
+    state.catalogs = scoped.catalogs;
+    rebuildRows();
   }
 
-  function buildLocalCatalogs() {
+  function renderModeUi() {
+    $('[data-mode-switch]').forEach((button) => button.classList.toggle('active', button.dataset.modeSwitch === state.mode));
+    $('[data-mode]').forEach((button) => button.classList.toggle('active', button.dataset.mode === state.mode));
+    const body = document.body;
+    body.dataset.mode = state.mode;
+    const heroTitle = $('.hero-card h3');
+    const heroText = $('.hero-card p');
+    if (heroTitle) heroTitle.textContent = isVaschetta() ? 'Le vaschette, confrontate davvero.' : 'Le offerte, senza più fogli sparsi.';
+    if (heroText) heroText.textContent = isVaschetta()
+      ? 'Confronta prezzo confezione, grammatura e prezzo equivalente al kg. Ogni nuova rilevazione aggiorna subito statistiche, classifiche e rinnovi.'
+      : 'Ogni nuova riga aggiorna subito prezzi medi, classifiche e andamento temporale. Per i dati storici la data offerta è ricostruita come scadenza meno 10 giorni.';
+    const productsTitle = $('#products .section-header h3');
+    if (productsTitle) productsTitle.textContent = isVaschetta() ? 'Cotti in vaschetta' : 'Prosciutti al taglio';
+  }
+
+  function setMode(nextMode, options = {}) {
+    state.mode = M.normalizeMode(nextMode);
+    try { localStorage.setItem('cdp-mode', state.mode); } catch (_) { /* storage opzionale */ }
+    state.page = 1;
+    state.livePeriod = '';
+    applyModeScope();
+    renderModeUi();
+    refreshAll();
+    if (options.closeGate !== false) {
+      const gate = $('#mode-gate');
+      if (gate) gate.hidden = true;
+    }
+    showToast(`Catalogo ${modeLabel()} attivo`, 'neutral');
+  }
+
+  function buildLocalCatalogs(allRows) {
     const extras = Local.loadCatalogExtras();
     const supermarketByName = new Map();
-    const productByName = new Map();
+    const productByKey = new Map();
 
     (extras.supermarkets || []).forEach((item) => supermarketByName.set(item.name, { ...item }));
-    (extras.products || []).forEach((item) => productByName.set(item.name, { ...item }));
+    (extras.products || []).forEach((item) => productByKey.set(`${item.mode || 'taglio'}\u0000${item.name}`, { ...item, mode: item.mode || 'taglio' }));
 
-    state.rows.forEach((row) => {
+    (allRows || []).forEach((row) => {
       if (row.supermarket && !supermarketByName.has(row.supermarket)) {
         supermarketByName.set(row.supermarket, { id: `local-supermarket-name:${row.supermarket}`, name: row.supermarket });
       }
-      if (row.product && !productByName.has(row.product)) {
-        productByName.set(row.product, { id: `local-product-name:${row.product}`, name: row.product, default_type: row.type || '' });
-      } else if (row.product && !productByName.get(row.product).default_type && row.type) {
-        productByName.get(row.product).default_type = row.type;
+      if (row.product) {
+        const mode = row.mode || 'taglio';
+        const key = `${mode}\u0000${row.product}`;
+        if (!productByKey.has(key)) {
+          productByKey.set(key, { id: `local-product-name:${mode}:${row.product}`, name: row.product, default_type: row.type || '', mode, brand_id: null, image_path: '' });
+        } else if (!productByKey.get(key).default_type && row.type) {
+          productByKey.get(key).default_type = row.type;
+        }
       }
     });
 
     return {
       supermarkets: [...supermarketByName.values()].sort((a, b) => a.name.localeCompare(b.name, 'it')),
-      products: [...productByName.values()].sort((a, b) => a.name.localeCompare(b.name, 'it'))
+      products: [...productByKey.values()].sort((a, b) => a.name.localeCompare(b.name, 'it')),
+      brands: [...(extras.brands || [])].sort((a, b) => a.name.localeCompare(b.name, 'it')),
+      variants: [...(extras.variants || [])].sort((a, b) => Number(a.weight_grams) - Number(b.weight_grams))
     };
   }
 
-  function activeCatalogs() {
-    if (state.cloudMode || state.localMode) return state.catalogs;
-    return {
-      supermarkets: A.supermarketStats(state.rows).map((item) => ({ id: item.name, name: item.name })),
-      products: A.productStats(state.rows).map((item) => ({ id: item.name, name: item.name, default_type: '' }))
-    };
+  function buildReadOnlyCatalogs(allRows) {
+    const supermarkets = [...new Set((allRows || []).map((row) => row.supermarket).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it')).map((name) => ({ id: name, name }));
+    const products = [];
+    const seen = new Set();
+    (allRows || []).forEach((row) => {
+      const mode = row.mode || 'taglio';
+      const key = `${mode}\u0000${row.product}`;
+      if (!row.product || seen.has(key)) return;
+      seen.add(key);
+      products.push({ id: `${mode}:${row.product}`, name: row.product, default_type: row.type || '', mode, brand_id: null, image_path: '' });
+    });
+    return { supermarkets, products, brands: [], variants: [] };
+  }
+
+  function activeCatalogs() { return state.catalogs; }
+
+  function variantsForProduct(productId) { return MC.variantsForProduct(state.catalogs.variants, productId); }
+
+  function brandOfProduct(product) {
+    if (!product) return null;
+    const relation = Array.isArray(product.brand) ? product.brand[0] : product.brand;
+    if (relation?.id || relation?.name) return relation;
+    return state.allCatalogs.brands.find((brand) => String(brand.id) === String(product.brand_id || product.brandId || '')) || null;
+  }
+
+  function assetUrl(bucket, path) {
+    if (!path) return '';
+    if (/^data:image\//i.test(String(path))) return String(path);
+    if (!state.cloudMode) return String(path);
+    try { return Cloud.publicAssetUrl(bucket, path); } catch (_) { return ''; }
+  }
+
+  function productForName(name) {
+    return state.catalogs.products.find((item) => item.name === name) || null;
+  }
+
+  function rowPriceHtml(row) {
+    const info = MC.priceDescriptor(row);
+    if (row.mode === 'vaschetta') {
+      return `<strong>${fmtEuro.format(info.packagePrice)}</strong><small>${info.weightGrams ? `${fmtInt.format(info.weightGrams)} g · ` : ''}${fmtEuro.format(info.comparisonPrice)}/kg</small>`;
+    }
+    return `<strong>${fmtEuro.format(info.comparisonPrice)}/kg</strong>`;
   }
 
   function rangeByOffer(rows) {
@@ -2453,47 +2908,62 @@ window.CDP_CONFIG = {
 
   function renderDashboard() {
     const { summary, products, supermarkets, months, types } = currentAggregates();
-    $('#source-label').textContent = state.cloudMode
-      ? `${fmtInt.format(state.rows.length)} offerte su Supabase`
-      : (state.localMode ? `${fmtInt.format(state.rows.length)} offerte · archivio locale` : `${fmtInt.format(historicalRows.length)} offerte · sola lettura`);
+    const sourceText = state.cloudMode
+      ? `${fmtInt.format(state.rows.length)} offerte ${modeLabel().toLowerCase()} su Supabase`
+      : (state.localMode ? `${fmtInt.format(state.rows.length)} offerte ${modeLabel().toLowerCase()} · archivio locale` : `${fmtInt.format(state.rows.length)} offerte ${modeLabel().toLowerCase()} · sola lettura`);
+    $('#source-label').textContent = sourceText;
+
+    const packageAverage = state.rows.length ? state.rows.reduce((sum, row) => sum + Number(row.price || 0), 0) / state.rows.length : 0;
+    const topProduct = summary.topProducts[0] || null;
+    const highestProduct = summary.highestAverageProduct;
+    const highestSupermarket = summary.highestAverageSupermarket;
+    const lowestSupermarket = summary.lowestAverageSupermarket;
+    const averageSub = isVaschetta()
+      ? `Confezione media ${fmtEuro.format(packageAverage)}`
+      : `Mediana ${fmtEuro.format(summary.medianPrice)}`;
 
     $('#dashboard-kpis').innerHTML = [
-      kpi('Offerte totali', fmtInt.format(summary.records), `${fmtInt.format(state.userOffers.length)} aggiunte da te`, 'accent'),
-      kpi('Prodotti distinti', fmtInt.format(summary.products), `${fmtPct.format(summary.top10Share)} nei Top 10`),
+      kpi('Offerte totali', fmtInt.format(summary.records), `${fmtInt.format(state.userOffers.length)} aggiunte manualmente`, 'accent'),
+      kpi('Prodotti distinti', fmtInt.format(summary.products), topProduct ? `${fmtPct.format(summary.top10Share)} nei Top 10` : 'Nessun dato'),
       kpi('Supermercati', fmtInt.format(summary.supermarkets), 'Insegne / punti vendita distinti'),
-      kpi('Prezzo medio', fmtEuro.format(summary.averagePrice), `Mediana ${fmtEuro.format(summary.medianPrice)}`),
-      kpi('Top prodotto', summary.topProducts[0].name, `${summary.topProducts[0].count} offerte`),
-      kpi('Prodotto più costoso', summary.highestAverageProduct.name, `Media ${fmtEuro.format(summary.highestAverageProduct.averagePrice)}`),
-      kpi('Supermercato più costoso', summary.highestAverageSupermarket.name, `Media ${fmtEuro.format(summary.highestAverageSupermarket.averagePrice)}`),
-      kpi('Supermercato meno costoso', summary.lowestAverageSupermarket.name, `Media ${fmtEuro.format(summary.lowestAverageSupermarket.averagePrice)}`)
+      kpi(isVaschetta() ? 'Prezzo medio equivalente' : 'Prezzo medio', `${fmtEuro.format(summary.averagePrice)}/kg`, averageSub),
+      kpi('Top prodotto', topProduct?.name || '—', topProduct ? `${topProduct.count} offerte` : 'Nessuna offerta'),
+      kpi('Prodotto più costoso', highestProduct?.name || '—', highestProduct ? `Media ${fmtEuro.format(highestProduct.averagePrice)}/kg` : 'Nessun dato'),
+      kpi('Supermercato più costoso', highestSupermarket?.name || '—', highestSupermarket ? `Media ${fmtEuro.format(highestSupermarket.averagePrice)}/kg` : 'Nessun dato'),
+      kpi('Supermercato meno costoso', lowestSupermarket?.name || '—', lowestSupermarket ? `Media ${fmtEuro.format(lowestSupermarket.averagePrice)}/kg` : 'Nessun dato')
     ].join('');
 
     C.line($('#monthly-price-chart'), months.map((item) => ({ label: item.month, value: item.averagePrice })), {
-      valueFormatter: (value) => fmtEuro.format(value),
+      valueFormatter: (value) => `${fmtEuro.format(value)}/kg`,
       labelFormatter: (value) => monthLabel(value),
       ariaLabel: 'Prezzo medio mensile per data offerta'
     });
-
     C.horizontalBar($('#top-products-chart'), summary.topProducts.map((item) => ({ label: item.name, value: item.count })), {
       valueFormatter: (value) => `${fmtInt.format(value)}`,
       ariaLabel: 'Top 10 prodotti per frequenza',
       left: 255
     });
 
+    if (!state.rows.length) {
+      $('#requested-stats').innerHTML = `<div class="empty-state">Nessuna offerta ${modeLabel().toLowerCase()} disponibile. Dopo l'importazione o il primo inserimento le statistiche compariranno automaticamente.</div>`;
+      $('#insights').innerHTML = `<li><span>Il catalogo ${modeLabel().toLowerCase()} è pronto ma non contiene ancora offerte.</span></li>`;
+      return;
+    }
+
     const top5 = A.denseRank(products.map((item) => ({ name: item.name, count: item.count, averagePrice: item.averagePrice })), 'count', 5);
     const statsRows = [
-      ['Prosciutto mediamente più costoso', summary.highestAverageProduct.name, summary.highestAverageProduct.count, fmtEuro.format(summary.highestAverageProduct.averagePrice)],
-      ['Supermercato più costoso', summary.highestAverageSupermarket.name, summary.highestAverageSupermarket.count, fmtEuro.format(summary.highestAverageSupermarket.averagePrice)],
-      ['Supermercato meno costoso', summary.lowestAverageSupermarket.name, summary.lowestAverageSupermarket.count, fmtEuro.format(summary.lowestAverageSupermarket.averagePrice)],
-      ['Media prezzo prosciutto', 'Media semplice delle medie prodotto', summary.products, fmtEuro.format(summary.simpleProductAverage)],
-      ['Media prezzo supermercato', 'Media semplice delle medie supermercato', summary.supermarkets, fmtEuro.format(summary.simpleSupermarketAverage)]
+      ['Prodotto mediamente più costoso', highestProduct.name, highestProduct.count, `${fmtEuro.format(highestProduct.averagePrice)}/kg`],
+      ['Supermercato più costoso', highestSupermarket.name, highestSupermarket.count, `${fmtEuro.format(highestSupermarket.averagePrice)}/kg`],
+      ['Supermercato meno costoso', lowestSupermarket.name, lowestSupermarket.count, `${fmtEuro.format(lowestSupermarket.averagePrice)}/kg`],
+      ['Media prezzo prodotto', 'Media semplice delle medie prodotto', summary.products, `${fmtEuro.format(summary.simpleProductAverage)}/kg`],
+      ['Media prezzo supermercato', 'Media semplice delle medie supermercato', summary.supermarkets, `${fmtEuro.format(summary.simpleSupermarketAverage)}/kg`]
     ].map(([label, value, n, eur]) => `<tr><td>${escapeHtml(label)}</td><td>${escapeHtml(value)}</td><td>${escapeHtml(n)}</td><td>${escapeHtml(eur)}</td></tr>`);
 
     $('#requested-stats').innerHTML = `
-      <h5 class="subheading">Top 5 prosciutti più volte in offerta</h5>
-      ${table(['Rank', 'Pari merito', 'Prodotto', 'N. offerte', 'Prezzo medio'], denseRankingRows(top5, 'Prodotto'))}
+      <h5 class="subheading">Top 5 prodotti più volte in offerta</h5>
+      ${table(['Rank', 'Pari merito', 'Prodotto', 'N. offerte', 'Prezzo medio €/kg'], denseRankingRows(top5, 'Prodotto'))}
       <div class="table-gap"></div>
-      ${table(['Statistica', 'Valore', 'N.', 'EUR'], statsRows)}
+      ${table(['Statistica', 'Valore', 'N.', 'Prezzo'], statsRows)}
     `;
 
     const maxMonth = [...months].sort((a, b) => b.averagePrice - a.averagePrice)[0];
@@ -2502,12 +2972,12 @@ window.CDP_CONFIG = {
     const highQuality = types.find((item) => item.type === 'Alta Qualità');
     const base = types.find((item) => item.type === 'Base');
     const insights = [
-      `${summary.topProducts[0].name} è il prodotto più presente con ${summary.topProducts[0].count} offerte; i primi 5 prodotti concentrano il ${fmtPct.format(summary.top5Share)} del dataset.`,
-      `Il prezzo medio complessivo è ${fmtEuro.format(summary.averagePrice)}. Il mese con media più alta è ${monthLabel(maxMonth.month, true)} (${fmtEuro.format(maxMonth.averagePrice)}), il più basso ${monthLabel(minMonth.month, true)} (${fmtEuro.format(minMonth.averagePrice)}).`,
+      `${topProduct.name} è il prodotto più presente con ${topProduct.count} offerte; i primi 5 prodotti concentrano il ${fmtPct.format(summary.top5Share)} del dataset.`,
+      `Il prezzo medio comparabile è ${fmtEuro.format(summary.averagePrice)}/kg. Il mese con media più alta è ${monthLabel(maxMonth.month, true)} (${fmtEuro.format(maxMonth.averagePrice)}/kg), il più basso ${monthLabel(minMonth.month, true)} (${fmtEuro.format(minMonth.averagePrice)}/kg).`,
       `${monthLabel(maxVolume.month, true)} registra il maggior numero di offerte: ${maxVolume.count}.`,
-      `${summary.highestAverageProduct.name} è il prodotto mediamente più caro (${fmtEuro.format(summary.highestAverageProduct.averagePrice)}); ${summary.highestAverageSupermarket.name} è il supermercato con media più alta (${fmtEuro.format(summary.highestAverageSupermarket.averagePrice)}).`,
-      highQuality && base ? `Alta Qualità rappresenta il ${fmtPct.format(highQuality.share)} delle osservazioni con media ${fmtEuro.format(highQuality.averagePrice)}, contro ${fmtEuro.format(base.averagePrice)} della tipologia Base.` : '',
-      state.userOffers.length ? `L'archivio contiene ${state.userOffers.length} offerte inserite manualmente, già incluse in dashboard e classifiche.` : (state.cloudMode ? 'Il database contiene solo lo storico importato: le nuove offerte compariranno qui in tempo reale.' : (state.localMode ? 'Archivio locale attivo: le nuove offerte verranno salvate in questo browser.' : 'Modalità sola lettura: stai consultando lo storico incorporato nel sito.'))
+      isVaschetta() ? `Il prezzo medio della confezione è ${fmtEuro.format(packageAverage)}; il confronto tra grammature viene sempre normalizzato in €/kg.` : `${highestProduct.name} è il prodotto mediamente più caro (${fmtEuro.format(highestProduct.averagePrice)}/kg).`,
+      !isVaschetta() && highQuality && base ? `Alta Qualità rappresenta il ${fmtPct.format(highQuality.share)} delle osservazioni con media ${fmtEuro.format(highQuality.averagePrice)}/kg, contro ${fmtEuro.format(base.averagePrice)}/kg della tipologia Base.` : '',
+      state.userOffers.length ? `L'archivio contiene ${state.userOffers.length} offerte inserite manualmente in questa modalità.` : `Le nuove offerte ${modeLabel().toLowerCase()} compariranno qui in tempo reale.`
     ].filter(Boolean);
     $('#insights').innerHTML = insights.map((text) => `<li><span>${escapeHtml(text)}</span></li>`).join('');
   }
@@ -2583,23 +3053,23 @@ window.CDP_CONFIG = {
 
     const stats = A.combinationStats(state.rows, supermarket.name, product.name, M.localIsoDate());
     if (!stats.count) {
-      container.innerHTML = `<div class="combination-title"><div><span class="eyebrow">Nuova combinazione</span><h5>${escapeHtml(supermarket.name)} × ${escapeHtml(product.name)}</h5></div></div><div class="empty-state">Questa combinazione non è mai stata rilevata.</div>`;
+      container.innerHTML = `<div class="combination-title"><div><span class="eyebrow">Nuova combinazione</span><h5>${escapeHtml(supermarket.name)} × ${escapeHtml(product.name)}</h5></div></div><div class="empty-state">Questa combinazione non è mai stata rilevata in modalità ${modeLabel().toLowerCase()}.</div>`;
       C.line(chart, [], {});
       history.innerHTML = '';
       return;
     }
 
-    const delta = stats.priceDelta == null
-      ? 'Prima rilevazione'
-      : `${stats.priceDelta >= 0 ? '+' : ''}${fmtEuro.format(stats.priceDelta)} (${stats.priceDeltaPct >= 0 ? '+' : ''}${fmtPct.format(stats.priceDeltaPct)})`;
+    const delta = stats.priceDelta == null ? 'Prima rilevazione' : `${stats.priceDelta >= 0 ? '+' : ''}${fmtEuro.format(stats.priceDelta)}/kg (${stats.priceDeltaPct >= 0 ? '+' : ''}${fmtPct.format(stats.priceDeltaPct)})`;
     const renewal = stats.averageRenewalDays == null ? '—' : `${fmtNumber.format(stats.averageRenewalDays)} gg`;
     const duration = stats.averageOfferDurationDays == null ? '—' : `${fmtNumber.format(stats.averageOfferDurationDays)} gg`;
+    const packageStat = isVaschetta() ? `<div class="combination-stat"><span>Media confezione</span><strong>${fmtEuro.format(stats.averagePackagePrice)}</strong><small>Ultima ${fmtEuro.format(stats.lastPackagePrice)}</small></div>` : '';
 
-    container.innerHTML = `<div class="combination-title"><div><span class="eyebrow">Combinazione selezionata</span><h5>${escapeHtml(supermarket.name)} × ${escapeHtml(product.name)}</h5></div><span class="combination-last">Ultima: ${formatDate(stats.lastOfferDate)}</span></div>
+    container.innerHTML = `<div class="combination-title"><div><span class="eyebrow">Combinazione selezionata · ${escapeHtml(modeLabel())}</span><h5>${escapeHtml(supermarket.name)} × ${escapeHtml(product.name)}</h5></div><span class="combination-last">Ultima: ${formatDate(stats.lastOfferDate)}</span></div>
       <div class="combination-stats-grid">
         <div class="combination-stat"><span>Offerte storiche</span><strong>${fmtInt.format(stats.count)}</strong><small>Per questa combinazione</small></div>
-        <div class="combination-stat"><span>Ultimo prezzo</span><strong>${fmtEuro.format(stats.lastPrice)}</strong><small>${escapeHtml(delta)}</small></div>
-        <div class="combination-stat"><span>Prezzo medio</span><strong>${fmtEuro.format(stats.averagePrice)}</strong><small>${fmtEuro.format(stats.minPrice)} – ${fmtEuro.format(stats.maxPrice)}</small></div>
+        <div class="combination-stat"><span>Ultimo prezzo €/kg</span><strong>${fmtEuro.format(stats.lastPrice)}</strong><small>${escapeHtml(delta)}</small></div>
+        <div class="combination-stat"><span>Prezzo medio €/kg</span><strong>${fmtEuro.format(stats.averagePrice)}</strong><small>${fmtEuro.format(stats.minPrice)} – ${fmtEuro.format(stats.maxPrice)}</small></div>
+        ${packageStat}
         <div class="combination-stat"><span>Frequenza media</span><strong>${renewal}</strong><small>Tra una rilevazione e la successiva</small></div>
         <div class="combination-stat"><span>Durata media offerta</span><strong>${duration}</strong><small>Da Data offerta a scadenza</small></div>
         <div class="combination-stat"><span>Ultima scadenza</span><strong>${formatDate(stats.lastExpiryDate)}</strong><small>${fmtInt.format(stats.daysSinceLastOffer)} gg dall'ultima rilevazione</small></div>
@@ -2610,15 +3080,18 @@ window.CDP_CONFIG = {
 
     C.line(chart, stats.trend.map((item) => ({ label: item.offerDate, value: item.price })), {
       compact: stats.trend.length > 12,
-      valueFormatter: (value) => fmtEuro.format(value),
+      valueFormatter: (value) => `${fmtEuro.format(value)}/kg`,
       labelFormatter: (value) => formatDate(value).slice(0, 5),
       ariaLabel: `Andamento prezzi ${supermarket.name} ${product.name}`
     });
 
     const recent = [...stats.trend].reverse().slice(0, 12);
+    const headers = isVaschetta() ? ['Data offerta', 'Scadenza', 'Grammatura', 'Prezzo confezione', '€/kg'] : ['Data offerta', 'Scadenza', 'Prezzo €/kg', 'Tipologia'];
     history.innerHTML = `<h5 class="subheading">Ultime rilevazioni</h5>${table(
-      ['Data offerta', 'Scadenza', 'Prezzo', 'Tipologia'],
-      recent.map((item) => `<tr><td><strong>${formatDate(item.offerDate)}</strong></td><td>${formatDate(item.expiryDate)}</td><td>${fmtEuro.format(item.price)}</td><td>${escapeHtml(item.type || '—')}</td></tr>`)
+      headers,
+      recent.map((item) => isVaschetta()
+        ? `<tr><td><strong>${formatDate(item.offerDate)}</strong></td><td>${formatDate(item.expiryDate)}</td><td>${item.weightGrams ? `${fmtInt.format(item.weightGrams)} g` : '—'}</td><td>${fmtEuro.format(item.packagePrice)}</td><td>${fmtEuro.format(item.price)}</td></tr>`
+        : `<tr><td><strong>${formatDate(item.offerDate)}</strong></td><td>${formatDate(item.expiryDate)}</td><td>${fmtEuro.format(item.price)}</td><td>${escapeHtml(item.type || '—')}</td></tr>`)
     )}`;
   }
 
@@ -2653,34 +3126,94 @@ window.CDP_CONFIG = {
     renderPublicCombinationStats();
   }
 
+  function renderOfferVariantOptions(selectedId = '') {
+    const productId = $('#offer-product')?.value || '';
+    const variants = variantsForProduct(productId);
+    const select = $('#offer-variant');
+    if (!select) return;
+    select.innerHTML = `<option value="">Seleziona grammatura</option>` + variants.map((item) => `<option value="${escapeHtml(item.id)}" ${String(item.id) === String(selectedId) ? 'selected' : ''}>${fmtInt.format(item.weight_grams)} g</option>`).join('');
+    select.required = isVaschetta();
+  }
+
+  function renderOfferPricePreview() {
+    const target = $('#offer-price-equivalent');
+    if (!target) return;
+    target.className = '';
+    if (!isVaschetta()) { target.textContent = 'Prezzo al chilogrammo'; return; }
+    const variant = variantsForProduct($('#offer-product')?.value).find((item) => String(item.id) === String($('#offer-variant')?.value || ''));
+    const raw = String($('#offer-price')?.value || '').trim().replace(',', '.');
+    const price = Number(raw);
+    if (!variant || !Number.isFinite(price) || price <= 0) { target.textContent = 'Il confronto €/kg apparirà dopo prezzo e grammatura'; return; }
+    const equivalent = M.pricePerKg(price, Number(variant.weight_grams));
+    target.textContent = `Equivalente ${fmtEuro.format(equivalent)}/kg`;
+    target.className = 'price-equivalent';
+  }
+
+  function renderCatalogMedia() {
+    const container = $('#catalog-media-grid');
+    if (!container) return;
+    const rows = [];
+    (state.allCatalogs.brands || []).forEach((brand) => {
+      const url = assetUrl('brand-logos', brand.logo_path || '');
+      rows.push(`<div class="catalog-media-row"><div>${url ? `<img src="${escapeHtml(url)}" alt="Logo ${escapeHtml(brand.name)}" />` : '<span class="brand-logo"></span>'}</div><div><strong>${escapeHtml(brand.name)}</strong><small>Logo marchio</small></div><input type="file" accept="image/jpeg,image/png,image/webp" data-brand-upload="${escapeHtml(brand.id)}" aria-label="Carica logo ${escapeHtml(brand.name)}" /></div>`);
+    });
+    (state.catalogs.products || []).forEach((product) => {
+      const url = assetUrl('product-images', product.image_path || '');
+      rows.push(`<div class="catalog-media-row"><div>${url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(product.name)}" />` : '<span class="product-placeholder"></span>'}</div><div><strong>${escapeHtml(product.name)}</strong><small>Immagine prodotto · ${modeLabel()}</small></div><input type="file" accept="image/jpeg,image/png,image/webp" data-product-upload="${escapeHtml(product.id)}" aria-label="Carica immagine ${escapeHtml(product.name)}" /></div>`);
+    });
+    container.innerHTML = rows.length ? rows.join('') : '<div class="empty-state">Aggiungi marchi o prodotti per gestire le immagini.</div>';
+  }
+
   function renderManage() {
-    const derivedSupermarkets = A.supermarketStats(state.rows).map((item) => ({ id: item.name, name: item.name }));
-    const derivedProducts = A.productStats(state.rows).map((item) => ({ id: item.name, name: item.name, default_type: '' }));
-    const supermarkets = (state.cloudMode || state.localMode) ? state.catalogs.supermarkets : derivedSupermarkets;
-    const products = (state.cloudMode || state.localMode) ? state.catalogs.products : derivedProducts;
+    const supermarkets = state.catalogs.supermarkets || [];
+    const products = state.catalogs.products || [];
     const supermarketSelect = $('#offer-supermarket');
     const productSelect = $('#offer-product');
     const selectedSupermarket = supermarketSelect?.value || '';
     const selectedProduct = productSelect?.value || '';
     if (supermarketSelect) supermarketSelect.innerHTML = catalogOptions(supermarkets, selectedSupermarket, 'Seleziona supermercato');
     if (productSelect) productSelect.innerHTML = catalogOptions(products, selectedProduct, 'Seleziona prosciutto');
+
+    const brands = state.allCatalogs.brands || [];
+    if ($('#catalog-product-brand')) $('#catalog-product-brand').innerHTML = catalogOptions(brands, $('#catalog-product-brand').value, 'Nessun marchio');
+    if ($('#variant-product')) $('#variant-product').innerHTML = catalogOptions(products, $('#variant-product').value, 'Seleziona prodotto');
+
     fillDatalist('#type-options', [...new Set(state.rows.map((row) => row.type).filter(Boolean))]);
+    const typeField = $('#offer-type-field');
+    const variantField = $('#offer-variant-field');
+    const productTypeField = $('#catalog-product-type-field');
+    const productWeightField = $('#catalog-product-weight-field');
+    const variantForm = $('#variant-form');
+    if (typeField) typeField.hidden = isVaschetta();
+    if (variantField) variantField.hidden = !isVaschetta();
+    if (productTypeField) productTypeField.hidden = isVaschetta();
+    if (productWeightField) productWeightField.hidden = !isVaschetta();
+    if (variantForm) variantForm.hidden = !isVaschetta();
+    if ($('#offer-type')) $('#offer-type').required = !isVaschetta();
+    if ($('#offer-price-label')) $('#offer-price-label').textContent = isVaschetta() ? 'Prezzo confezione (€)' : 'Prezzo (€ / kg)';
+    if ($('#offer-price')) $('#offer-price').placeholder = isVaschetta() ? 'Es. 1,59' : 'Es. 12,90';
+    renderOfferVariantOptions($('#offer-variant')?.value || '');
+    renderOfferPricePreview();
 
     $('#user-offer-count').textContent = fmtInt.format(state.userOffers.length);
     const sorted = [...state.userOffers].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).slice(0, 50);
+    const headers = isVaschetta()
+      ? ['Data offerta', 'Scadenza', 'Supermercato', 'Prodotto', 'Grammatura', 'Prezzo', '']
+      : ['Data offerta', 'Scadenza', 'Supermercato', 'Prodotto', 'Tipologia', 'Prezzo', ''];
     $('#user-offers-table').innerHTML = table(
-      ['Data offerta', 'Scadenza', 'Supermercato', 'Prodotto', 'Tipologia', 'Prezzo', ''],
+      headers,
       sorted.map((row) => `<tr>
         <td>${formatDate(row.offerDate)}</td>
         <td>${formatDate(row.expiryDate)}</td>
         <td>${escapeHtml(row.supermarket)}</td>
         <td>${escapeHtml(row.product)}</td>
-        <td>${escapeHtml(row.type)}</td>
-        <td><strong>${fmtEuro.format(row.price)}</strong></td>
+        <td>${isVaschetta() ? `${fmtInt.format(row.weightGrams || 0)} g` : escapeHtml(row.type || '—')}</td>
+        <td><div class="table-price">${rowPriceHtml(row)}</div></td>
         <td>${state.isAdmin ? `<button class="icon-button danger" type="button" data-delete-offer="${escapeHtml(row.id)}" title="Elimina offerta">×</button>` : '—'}</td>
       </tr>`),
       state.localMode ? 'Non ci sono ancora offerte inserite manualmente in questo browser.' : 'Non ci sono ancora offerte inserite manualmente nel database.'
     );
+    renderCatalogMedia();
     renderSupermarketRenewalBoard(supermarkets);
     renderCombinationStats();
     updateAuthUi();
@@ -2689,14 +3222,14 @@ window.CDP_CONFIG = {
   function renderTop10() {
     const summary = A.summarize(state.rows);
     const grid = $('#top10-grid');
-    grid.innerHTML = summary.topProducts.map((product, index) => `
+    grid.innerHTML = summary.topProducts.length ? summary.topProducts.map((product, index) => `
       <article class="mini-chart-card">
         <div class="mini-rank">#${index + 1}</div>
         <h4>${escapeHtml(product.name)}</h4>
         <div class="mini-chart-meta">${fmtInt.format(product.count)} offerte · media ${fmtEuro.format(product.averagePrice)}</div>
         <div class="chart compact" id="top10-chart-${index}"></div>
       </article>
-    `).join('');
+    `).join('') : `<div class="empty-state">Nessun dato disponibile per la modalità ${escapeHtml(modeLabel())}.</div>`;
     summary.topProducts.forEach((product, index) => {
       const trend = A.trendForProduct(state.rows, product.name);
       C.line($(`#top10-chart-${index}`), trend.map((item) => ({ label: item.month, value: item.averagePrice })), {
@@ -2713,46 +3246,82 @@ window.CDP_CONFIG = {
     const select = $('#product-select');
     const previous = select.value;
     const names = products.map((item) => item.name);
-    const selected = names.includes(previous) ? previous : names[0];
+    const selected = names.includes(previous) ? previous : (names[0] || '');
     fillSelect(select, names, null, selected);
     if (selected) select.value = selected;
 
-    $('#products-table').innerHTML = table(
-      ['Prodotto', 'Offerte', 'Supermercati', 'Prezzo medio', 'Mediana', 'Min', 'Max', 'Prima offerta', 'Ultima offerta', 'Tipologie'],
+    const cardGrid = $('#product-card-grid');
+    if (cardGrid) {
+      cardGrid.innerHTML = products.length ? products.map((stat) => {
+        const catalog = productForName(stat.name);
+        const brand = brandOfProduct(catalog);
+        const image = assetUrl('product-images', catalog?.image_path || '');
+        const logo = assetUrl('brand-logos', brand?.logo_path || '');
+        const variants = catalog ? variantsForProduct(catalog.id) : [];
+        const variantText = variants.map((item) => `${fmtInt.format(item.weight_grams)} g`).join(' · ');
+        return `<article class="product-card ${stat.name === selected ? 'selected' : ''}">
+          <button class="product-card-button" type="button" data-product-card="${escapeHtml(stat.name)}">
+            <div class="product-media">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(stat.name)}" loading="lazy" />` : '<span class="product-placeholder" aria-hidden="true"></span>'}</div>
+            <div class="product-card-body">
+              <div class="brand-line">${logo ? `<img class="brand-logo" src="${escapeHtml(logo)}" alt="Logo ${escapeHtml(brand?.name || '')}" loading="lazy" />` : ''}<span>${escapeHtml(brand?.name || 'Marchio non associato')}</span></div>
+              <h4>${escapeHtml(stat.name)}</h4>
+              <div class="product-card-meta"><span class="product-chip">${escapeHtml(modeLabel())}</span>${isVaschetta() && variantText ? `<span class="product-chip">${escapeHtml(variantText)}</span>` : ''}</div>
+              <div class="product-price-line"><span>${fmtInt.format(stat.count)} offerte</span><strong>${isVaschetta() ? `${fmtEuro.format(stat.averagePackagePrice)} conf.` : `${fmtEuro.format(stat.averagePrice)}/kg`}</strong></div>
+            </div>
+          </button>
+        </article>`;
+      }).join('') : `<div class="empty-state">Nessun prodotto ${modeLabel().toLowerCase()} con offerte disponibili.</div>`;
+    }
+
+    const headers = isVaschetta()
+      ? ['Prodotto', 'Offerte', 'Supermercati', 'Prezzo medio €/kg', 'Prezzo medio confezione', 'Min €/kg', 'Max €/kg', 'Prima offerta', 'Ultima offerta', 'Grammature']
+      : ['Prodotto', 'Offerte', 'Supermercati', 'Prezzo medio €/kg', 'Mediana', 'Min', 'Max', 'Prima offerta', 'Ultima offerta', 'Tipologie'];
+    $('#products-table').innerHTML = table(headers,
       products.map((item) => {
         const entityRows = state.rows.filter((row) => row.product === item.name);
         const [firstOffer, lastOffer] = rangeByOffer(entityRows);
-        return `<tr><td><strong>${escapeHtml(item.name)}</strong></td><td>${fmtInt.format(item.count)}</td><td>${fmtInt.format(item.relatedCount)}</td><td>${fmtEuro.format(item.averagePrice)}</td><td>${fmtEuro.format(item.medianPrice)}</td><td>${fmtEuro.format(item.minPrice)}</td><td>${fmtEuro.format(item.maxPrice)}</td><td>${firstOffer}</td><td>${lastOffer}</td><td>${formatTypes(item.types)}</td></tr>`;
+        const catalog = productForName(item.name);
+        const variants = catalog ? variantsForProduct(catalog.id) : [];
+        const detail = isVaschetta() ? (variants.map((v) => `${fmtInt.format(v.weight_grams)} g`).join(', ') || '—') : formatTypes(item.types);
+        return `<tr><td><strong>${escapeHtml(item.name)}</strong></td><td>${fmtInt.format(item.count)}</td><td>${fmtInt.format(item.relatedCount)}</td><td>${fmtEuro.format(item.averagePrice)}</td><td>${isVaschetta() ? fmtEuro.format(item.averagePackagePrice) : fmtEuro.format(item.medianPrice)}</td><td>${fmtEuro.format(item.minPrice)}</td><td>${fmtEuro.format(item.maxPrice)}</td><td>${firstOffer}</td><td>${lastOffer}</td><td>${detail}</td></tr>`;
       })
     );
     renderProductDetail(selected);
   }
 
   function renderProductDetail(productName) {
-    const products = A.productStats(state.rows);
-    const stat = products.find((item) => item.name === productName);
-    if (!stat) return;
+    const stat = A.productStats(state.rows).find((item) => item.name === productName);
+    if (!stat) {
+      $('#product-detail').innerHTML = '<div class="empty-state">Seleziona un prodotto con offerte per visualizzare il dettaglio.</div>';
+      C.horizontalBar($('#product-supermarkets-chart'), [], {});
+      $('#product-supermarkets-table').innerHTML = '';
+      return;
+    }
     const entityRows = state.rows.filter((row) => row.product === stat.name);
     const [firstOffer, lastOffer] = rangeByOffer(entityRows);
+    const catalog = productForName(stat.name);
+    const brand = brandOfProduct(catalog);
+    const variants = catalog ? variantsForProduct(catalog.id) : [];
+    const descriptor = isVaschetta()
+      ? `<span class="mode-context">${variants.map((v) => `${fmtInt.format(v.weight_grams)} g`).join(' · ') || 'Vaschetta'}</span>`
+      : formatTypes(stat.types);
     $('#product-detail').innerHTML = `<article class="detail-card">
-      <div class="detail-head"><div><span class="eyebrow">Scheda prodotto</span><h4>${escapeHtml(stat.name)}</h4><p>Offerte dal ${firstOffer} al ${lastOffer}</p></div><div>${formatTypes(stat.types)}</div></div>
+      <div class="detail-head"><div><span class="eyebrow">Scheda prodotto · ${escapeHtml(modeLabel())}</span><h4>${escapeHtml(stat.name)}</h4><p>${brand?.name ? `${escapeHtml(brand.name)} · ` : ''}Offerte dal ${firstOffer} al ${lastOffer}</p></div><div>${descriptor}</div></div>
       ${metrics([
         ['Offerte', fmtInt.format(stat.count)],
         ['Supermercati', fmtInt.format(stat.relatedCount)],
-        ['Prezzo medio', fmtEuro.format(stat.averagePrice)],
-        ['Min / Max', `${fmtEuro.format(stat.minPrice)} / ${fmtEuro.format(stat.maxPrice)}`],
-        ['Deviazione std.', fmtNumber.format(stat.stdDev)]
+        ['Prezzo medio €/kg', fmtEuro.format(stat.averagePrice)],
+        [isVaschetta() ? 'Media confezione' : 'Min / Max', isVaschetta() ? fmtEuro.format(stat.averagePackagePrice) : `${fmtEuro.format(stat.minPrice)} / ${fmtEuro.format(stat.maxPrice)}`],
+        ['Min / Max €/kg', `${fmtEuro.format(stat.minPrice)} / ${fmtEuro.format(stat.maxPrice)}`]
       ])}
     </article>`;
 
     const ranking = A.topSupermarketsForProduct(state.rows, stat.name, 5);
     C.horizontalBar($('#product-supermarkets-chart'), ranking.map((item) => ({ label: `#${item.rank} ${item.name}`, value: item.count })), {
-      valueFormatter: (value) => `${fmtInt.format(value)} volte`,
-      ariaLabel: `Top supermercati per ${stat.name}`,
-      left: 260
+      valueFormatter: (value) => `${fmtInt.format(value)} volte`, ariaLabel: `Top supermercati per ${stat.name}`, left: 260
     });
     $('#product-supermarkets-table').innerHTML = table(
-      ['Rank', 'Pari merito', 'Supermercato', 'N. volte', 'Quota', 'Prezzo medio'],
+      ['Rank', 'Pari merito', 'Supermercato', 'N. volte', 'Quota', 'Prezzo medio €/kg'],
       ranking.map((item) => {
         const tied = ranking.filter((x) => x.rank === item.rank).length > 1;
         return `<tr><td><span class="rank-badge">${item.rank}</span></td><td>${tied ? '<span class="tie">Sì</span>' : 'No'}</td><td>${escapeHtml(item.name)}</td><td>${fmtInt.format(item.count)}</td><td>${fmtPct.format(item.share)}</td><td>${fmtEuro.format(item.averagePrice)}</td></tr>`;
@@ -2783,7 +3352,12 @@ window.CDP_CONFIG = {
   function renderSupermarketDetail(supermarketName) {
     const supermarkets = A.supermarketStats(state.rows);
     const stat = supermarkets.find((item) => item.name === supermarketName);
-    if (!stat) return;
+    if (!stat) {
+      $('#supermarket-detail').innerHTML = '<div class="empty-state">Nessun supermercato con offerte disponibile per questa modalità.</div>';
+      C.horizontalBar($('#supermarket-products-chart'), [], {});
+      $('#supermarket-products-table').innerHTML = '';
+      return;
+    }
     const entityRows = state.rows.filter((row) => row.supermarket === stat.name);
     const [firstOffer, lastOffer] = rangeByOffer(entityRows);
     $('#supermarket-detail').innerHTML = `<article class="detail-card">
@@ -2813,12 +3387,8 @@ window.CDP_CONFIG = {
   }
 
   function periodAggregateRows(granularity) {
-    const stats = granularity === 'month'
-      ? A.monthlyStats(state.rows).map((item) => ({ key: item.month, ...item }))
-      : granularity === 'quarter'
-        ? A.quarterlyStats(state.rows).map((item) => ({ key: item.quarter, ...item }))
-        : A.yearlyStats(state.rows).map((item) => ({ key: item.year, ...item }));
-    return stats.sort((a, b) => String(b.key).localeCompare(String(a.key)));
+    return A.periodKeysThroughDate(state.rows, granularity, M.localIsoDate())
+      .map((key) => ({ key, ...A.periodSummary(state.rows, granularity, key) }));
   }
 
   function deltaDescriptor(current, previous, valueFormatter) {
@@ -2844,10 +3414,10 @@ window.CDP_CONFIG = {
 
   function renderLive() {
     const granularity = state.liveGranularity;
-    const keys = A.periodKeys(state.rows, granularity);
+    const keys = A.periodKeysThroughDate(state.rows, granularity, M.localIsoDate());
     if (!keys.includes(state.livePeriod)) state.livePeriod = keys[0] || '';
 
-    $$('#live-granularity button').forEach((button) => button.classList.toggle('active', button.dataset.granularity === granularity));
+    $('#live-granularity button').forEach((button) => button.classList.toggle('active', button.dataset.granularity === granularity));
     fillSelect($('#live-period-select'), keys, null, state.livePeriod, (key) => periodLabel(granularity, key));
     if (state.livePeriod) $('#live-period-select').value = state.livePeriod;
 
@@ -2855,6 +3425,12 @@ window.CDP_CONFIG = {
     if (!key) {
       $('#live-kpis').innerHTML = '';
       $('#live-compare').innerHTML = '<div class="empty-state">Nessun periodo disponibile.</div>';
+      C.line($('#live-trend-chart'), [], {});
+      C.horizontalBar($('#live-count-chart'), [], {});
+      $('#live-top-products').innerHTML = '';
+      $('#live-top-supermarkets').innerHTML = '';
+      $('#live-types-table').innerHTML = '';
+      $('#live-history-table').innerHTML = '';
       return;
     }
 
@@ -2868,9 +3444,9 @@ window.CDP_CONFIG = {
       kpi('Offerte', fmtInt.format(current.count), periodLabel(granularity, key), 'accent'),
       kpi('Prodotti', fmtInt.format(current.products), 'Referenze distinte'),
       kpi('Supermercati', fmtInt.format(current.supermarkets), 'Insegne distinte'),
-      kpi('Prezzo medio', fmtEuro.format(current.averagePrice), `Mediana ${fmtEuro.format(current.medianPrice)}`),
-      kpi('Prezzo minimo', fmtEuro.format(current.minPrice), 'Nel periodo selezionato'),
-      kpi('Prezzo massimo', fmtEuro.format(current.maxPrice), 'Nel periodo selezionato')
+      kpi(isVaschetta() ? 'Prezzo medio equivalente' : 'Prezzo medio', `${fmtEuro.format(current.averagePrice)}/kg`, `Mediana ${fmtEuro.format(current.medianPrice)}/kg`),
+      kpi('Prezzo minimo', `${fmtEuro.format(current.minPrice)}/kg`, 'Nel periodo selezionato'),
+      kpi('Prezzo massimo', `${fmtEuro.format(current.maxPrice)}/kg`, 'Nel periodo selezionato')
     ].join('');
 
     const volumeDelta = deltaDescriptor(current.count, previous.count, (value) => fmtInt.format(value));
@@ -2899,11 +3475,26 @@ window.CDP_CONFIG = {
     renderLiveRanking($('#live-top-products'), productRanking, 'Prodotto');
     renderLiveRanking($('#live-top-supermarkets'), supermarketRanking, 'Supermercato');
 
-    const typeStats = A.typeStats(subset);
-    $('#live-types-table').innerHTML = table(
-      ['Tipologia', 'Offerte', 'Quota', 'Prezzo medio', 'Min', 'Max'],
-      typeStats.map((item) => `<tr><td><span class="tag">${escapeHtml(item.type)}</span></td><td>${fmtInt.format(item.count)}</td><td>${fmtPct.format(item.share)}</td><td>${fmtEuro.format(item.averagePrice)}</td><td>${fmtEuro.format(item.minPrice)}</td><td>${fmtEuro.format(item.maxPrice)}</td></tr>`)
-    );
+    if (isVaschetta()) {
+      const weights = [...new Set(subset.map((row) => row.weightGrams).filter(Boolean))].sort((a,b)=>a-b);
+      const entries = weights.map((weight) => {
+        const rows = subset.filter((row) => Number(row.weightGrams) === Number(weight));
+        const averageKg = rows.length ? rows.reduce((sum,row)=>sum+Number(row.comparisonPrice || row.price || 0),0)/rows.length : 0;
+        const averagePackage = rows.length ? rows.reduce((sum,row)=>sum+Number(row.price || 0),0)/rows.length : 0;
+        return { weight, count: rows.length, share: subset.length ? rows.length/subset.length : 0, averageKg, averagePackage };
+      });
+      $('#live-types-table').innerHTML = table(
+        ['Grammatura', 'Offerte', 'Quota', 'Media confezione', 'Media €/kg'],
+        entries.map((item) => `<tr><td><span class="tag">${fmtInt.format(item.weight)} g</span></td><td>${fmtInt.format(item.count)}</td><td>${fmtPct.format(item.share)}</td><td>${fmtEuro.format(item.averagePackage)}</td><td>${fmtEuro.format(item.averageKg)}</td></tr>`),
+        'Nessuna grammatura nel periodo selezionato.'
+      );
+    } else {
+      const typeStats = A.typeStats(subset);
+      $('#live-types-table').innerHTML = table(
+        ['Tipologia', 'Offerte', 'Quota', 'Prezzo medio', 'Min', 'Max'],
+        typeStats.map((item) => `<tr><td><span class="tag">${escapeHtml(item.type)}</span></td><td>${fmtInt.format(item.count)}</td><td>${fmtPct.format(item.share)}</td><td>${fmtEuro.format(item.averagePrice)}</td><td>${fmtEuro.format(item.minPrice)}</td><td>${fmtEuro.format(item.maxPrice)}</td></tr>`)
+      );
+    }
 
     const history = periodAggregateRows(granularity);
     $('#live-history-table').innerHTML = table(
@@ -2921,6 +3512,7 @@ window.CDP_CONFIG = {
     fillSelect($('#filter-product'), products, 'Tutti i prodotti', current.product);
     fillSelect($('#filter-supermarket'), supermarkets, 'Tutti i supermercati', current.supermarket);
     fillSelect($('#filter-type'), types, 'Tutte le tipologie', current.type);
+    if ($('#filter-type-field')) $('#filter-type-field').hidden = isVaschetta();
     fillSelect($('#filter-month'), months, 'Tutti i mesi', current.month, (value) => monthLabel(value, true));
     if ($('#filter-origin')) $('#filter-origin').value = current.origin || '';
     if ($('#filter-sort') && !$('#filter-sort').value) $('#filter-sort').value = 'offerDateDesc';
@@ -2938,14 +3530,19 @@ window.CDP_CONFIG = {
   }
 
   function renderData() {
-    const filtered = A.sortRows(A.filterRows(state.rows, currentDataFilters()), $('#filter-sort')?.value || 'offerDateDesc');
+    const filters = currentDataFilters();
+    if (isVaschetta()) filters.type = '';
+    const filtered = A.sortRows(A.filterRows(state.rows, filters), $('#filter-sort')?.value || 'offerDateDesc');
     const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
     if (state.page > totalPages) state.page = totalPages;
     const start = (state.page - 1) * state.pageSize;
     const pageRows = filtered.slice(start, start + state.pageSize);
+    const headers = isVaschetta()
+      ? ['Origine', 'Data offerta', 'Scadenza', 'Supermercato', 'Prodotto', 'Grammatura', 'Mese', 'Trimestre', 'Anno', 'Prezzo confezione / €/kg']
+      : ['Origine', 'Data offerta', 'Scadenza', 'Supermercato', 'Prodotto', 'Tipologia', 'Mese', 'Trimestre', 'Anno', 'Prezzo €/kg'];
     $('#data-table').innerHTML = table(
-      ['Origine', 'Data offerta', 'Scadenza', 'Supermercato', 'Prodotto', 'Tipologia', 'Mese', 'Trimestre', 'Anno', 'Prezzo'],
-      pageRows.map((row) => `<tr><td>${originBadge(row)}</td><td><strong>${formatDate(row.offerDate)}</strong></td><td>${formatDate(row.expiryDate)}</td><td>${escapeHtml(row.supermarket)}</td><td>${escapeHtml(row.product)}</td><td>${escapeHtml(row.type || '—')}</td><td>${escapeHtml(row.month)}</td><td>${escapeHtml(row.quarter)}</td><td>${escapeHtml(row.year)}</td><td><strong>${fmtEuro.format(row.price)}</strong></td></tr>`)
+      headers,
+      pageRows.map((row) => `<tr><td>${originBadge(row)}</td><td><strong>${formatDate(row.offerDate)}</strong></td><td>${formatDate(row.expiryDate)}</td><td>${escapeHtml(row.supermarket)}</td><td>${escapeHtml(row.product)}</td><td>${isVaschetta() ? `${fmtInt.format(row.weightGrams || 0)} g` : escapeHtml(row.type || '—')}</td><td>${escapeHtml(row.month)}</td><td>${escapeHtml(row.quarter)}</td><td>${escapeHtml(row.year)}</td><td><div class="table-price">${rowPriceHtml(row)}</div></td></tr>`)
     );
     $('#page-info').textContent = `${fmtInt.format(filtered.length)} record · pagina ${state.page} di ${totalPages}`;
     $('#prev-page').disabled = state.page <= 1;
@@ -2979,17 +3576,17 @@ window.CDP_CONFIG = {
   async function reloadCloudData(options = {}) {
     if (!state.cloudMode) return;
     const [rows, catalogs] = await Promise.all([Cloud.loadDataset(), Cloud.loadCatalogs()]);
-    state.rows = rows;
-    state.catalogs = catalogs;
-    rebuildRows();
+    state.allRows = rows;
+    state.allCatalogs = catalogs;
+    applyModeScope();
     if (!options.skipRender) refreshAll();
   }
 
   function reloadLocalData(options = {}) {
     if (!state.localMode) return;
-    state.rows = historicalRows.concat(Local.loadOffers());
-    rebuildRows();
-    state.catalogs = buildLocalCatalogs();
+    state.allRows = historicalRows.concat(Local.loadOffers());
+    state.allCatalogs = buildLocalCatalogs(state.allRows);
+    applyModeScope();
     if (!options.skipRender) refreshAll();
   }
 
@@ -3006,42 +3603,42 @@ window.CDP_CONFIG = {
     const catalogs = activeCatalogs();
     const supermarket = catalogs.supermarkets.find((item) => String(item.id) === String(supermarketId));
     const product = catalogs.products.find((item) => String(item.id) === String(productId));
+    const variant = isVaschetta() ? variantsForProduct(productId).find((item) => String(item.id) === String($('#offer-variant').value || '')) : null;
     try {
       if (!supermarket || !product) throw new Error('Seleziona supermercato e prosciutto dai cataloghi');
+      if (isVaschetta() && !variant) throw new Error('Seleziona la grammatura della confezione');
       const validated = M.createManualOffer({
         supermarket: supermarket.name,
         product: product.name,
-        type: $('#offer-type').value,
+        mode: state.mode,
+        type: isVaschetta() ? '' : $('#offer-type').value,
         price: $('#offer-price').value,
+        weightGrams: variant?.weight_grams || null,
+        variantId: variant?.id || null,
         expiryDate: $('#offer-expiry').value
       }, M.localIsoDate());
 
       if (state.cloudMode) {
         await Cloud.addOffer({
-          supermarketId,
-          productId,
-          type: validated.type,
-          price: validated.price,
-          offerDate: validated.offerDate,
-          expiryDate: validated.expiryDate
+          supermarketId, productId, variantId: validated.variantId,
+          type: validated.type, price: validated.price,
+          offerDate: validated.offerDate, expiryDate: validated.expiryDate
         });
         await reloadCloudData();
       } else {
         Local.addOffer({
-          supermarketId,
-          productId,
-          supermarket: supermarket.name,
-          product: product.name,
-          type: validated.type,
-          price: validated.price,
-          offerDate: validated.offerDate,
-          expiryDate: validated.expiryDate
+          supermarketId, productId, variantId: validated.variantId,
+          supermarket: supermarket.name, product: product.name,
+          mode: state.mode, type: validated.type, price: validated.price,
+          weightGrams: validated.weightGrams,
+          offerDate: validated.offerDate, expiryDate: validated.expiryDate
         });
         reloadLocalData();
       }
 
       form.reset();
       setFormDate();
+      renderManage();
       showFormMessage('success', state.cloudMode ? 'Offerta salvata su Supabase. Statistiche aggiornate.' : 'Offerta salvata nel browser. Statistiche aggiornate.');
       showToast('Offerta aggiunta e statistiche aggiornate');
     } catch (error) {
@@ -3125,22 +3722,111 @@ window.CDP_CONFIG = {
     }
   }
 
+  function validateImageFile(file) {
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/i.test(String(file.type || ''))) throw new Error('Usa un file JPG, PNG oppure WebP');
+    if (Number(file.size || 0) > 3 * 1024 * 1024) throw new Error('Immagine troppo grande: massimo 3 MB');
+  }
+
+  function fileToDataUrl(file) {
+    validateImageFile(file);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Impossibile leggere l\'immagine'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleAddBrand(event) {
+    event.preventDefault();
+    if (!state.isAdmin) return;
+    const name = $('#brand-name');
+    const file = $('#brand-logo')?.files?.[0] || null;
+    try {
+      validateImageFile(file);
+      const created = state.cloudMode ? await Cloud.addBrand(name.value) : Local.addBrand(name.value);
+      if (file) {
+        if (state.cloudMode) await Cloud.uploadBrandLogo(created.id, file);
+        else Local.setBrandLogo(created.id, await fileToDataUrl(file));
+      }
+      name.value = '';
+      if ($('#brand-logo')) $('#brand-logo').value = '';
+      if (state.cloudMode) await reloadCloudData(); else reloadLocalData();
+      showToast(`Marchio "${created.name}" aggiunto`);
+    } catch (error) {
+      showToast(error.message || 'Impossibile aggiungere il marchio', 'error');
+    }
+  }
+
   async function handleAddProduct(event) {
     event.preventDefault();
     if (!state.isAdmin) return;
     const name = $('#catalog-product-name');
     const type = $('#catalog-product-type');
+    const brandId = $('#catalog-product-brand')?.value || null;
+    const image = $('#catalog-product-image')?.files?.[0] || null;
+    const initialWeight = $('#catalog-product-weight')?.value || '';
     try {
-      const created = state.cloudMode ? await Cloud.addProduct(name.value, type.value) : Local.addProduct(name.value, type.value);
+      validateImageFile(image);
+      if (isVaschetta() && initialWeight && (!Number.isInteger(Number(initialWeight)) || Number(initialWeight) <= 0)) throw new Error('Grammatura non valida');
+      const options = { mode: state.mode, brandId };
+      const created = state.cloudMode ? await Cloud.addProduct(name.value, isVaschetta() ? '' : type.value, options) : Local.addProduct(name.value, isVaschetta() ? '' : type.value, options);
+      if (isVaschetta() && initialWeight) {
+        if (state.cloudMode) await Cloud.addVariant(created.id, Number(initialWeight));
+        else Local.addVariant(created.id, Number(initialWeight));
+      }
+      if (image) {
+        if (state.cloudMode) await Cloud.uploadProductImage(created.id, image);
+        else Local.setProductImage(created.id, await fileToDataUrl(image));
+      }
       name.value = '';
       type.value = '';
+      if ($('#catalog-product-weight')) $('#catalog-product-weight').value = '';
+      if ($('#catalog-product-image')) $('#catalog-product-image').value = '';
       if (state.cloudMode) await reloadCloudData(); else reloadLocalData();
       $('#offer-product').value = String(created.id);
-      if (created.default_type) $('#offer-type').value = created.default_type;
-      renderCombinationStats();
-      showToast(`Prosciutto "${created.name}" aggiunto`);
+      if (!isVaschetta() && created.default_type) $('#offer-type').value = created.default_type;
+      renderManage();
+      showToast(`Prosciutto "${created.name}" aggiunto a ${modeLabel().toLowerCase()}`);
     } catch (error) {
       showToast(error.message || 'Impossibile aggiungere il prosciutto', 'error');
+    }
+  }
+
+  async function handleAddVariant(event) {
+    event.preventDefault();
+    if (!state.isAdmin || !isVaschetta()) return;
+    const productId = $('#variant-product')?.value || '';
+    const weight = Number($('#variant-weight')?.value || 0);
+    try {
+      if (!productId) throw new Error('Seleziona un prodotto');
+      if (!Number.isInteger(weight) || weight <= 0) throw new Error('Grammatura non valida');
+      if (state.cloudMode) await Cloud.addVariant(productId, weight); else Local.addVariant(productId, weight);
+      $('#variant-weight').value = '';
+      if (state.cloudMode) await reloadCloudData(); else reloadLocalData();
+      showToast(`Grammatura ${weight} g aggiunta`);
+    } catch (error) {
+      showToast(error.message || 'Impossibile aggiungere la grammatura', 'error');
+    }
+  }
+
+  async function handleMediaUpload(input) {
+    if (!state.isAdmin || !input?.files?.[0]) return;
+    const file = input.files[0];
+    try {
+      validateImageFile(file);
+      if (input.dataset.brandUpload) {
+        if (state.cloudMode) await Cloud.uploadBrandLogo(input.dataset.brandUpload, file);
+        else Local.setBrandLogo(input.dataset.brandUpload, await fileToDataUrl(file));
+      } else if (input.dataset.productUpload) {
+        if (state.cloudMode) await Cloud.uploadProductImage(input.dataset.productUpload, file);
+        else Local.setProductImage(input.dataset.productUpload, await fileToDataUrl(file));
+      }
+      if (state.cloudMode) await reloadCloudData(); else reloadLocalData();
+      showToast('Immagine aggiornata');
+    } catch (error) {
+      showToast(error.message || 'Impossibile caricare l\'immagine', 'error');
     }
   }
 
@@ -3151,6 +3837,7 @@ window.CDP_CONFIG = {
     $('#offer-supermarket').value = String(supermarket.id);
     $('#offer-product').value = '';
     $('#offer-type').value = '';
+    if ($('#offer-variant')) $('#offer-variant').value = '';
     $('#offer-price').value = '';
     $('#offer-expiry').value = M.localIsoDate();
     renderCombinationStats();
@@ -3186,29 +3873,23 @@ window.CDP_CONFIG = {
   }
 
   function exportCsv() {
-    const headers = ['Data offerta', 'Data scadenza', 'Supermercato', 'Prodotto', 'Tipologia', 'Prezzo EUR', 'Origine', 'Mese', 'Trimestre', 'Anno'];
+    const headers = isVaschetta()
+      ? ['Data offerta', 'Data scadenza', 'Supermercato', 'Prodotto', 'Grammatura g', 'Prezzo confezione EUR', 'Prezzo equivalente EUR/kg', 'Origine', 'Mese', 'Trimestre', 'Anno']
+      : ['Data offerta', 'Data scadenza', 'Supermercato', 'Prodotto', 'Tipologia', 'Prezzo EUR/kg', 'Origine', 'Mese', 'Trimestre', 'Anno'];
     const lines = [headers.map(csvEscape).join(';')];
     state.rows.forEach((row) => {
-      lines.push([
-        row.offerDate,
-        row.expiryDate,
-        row.supermarket,
-        row.product,
-        row.type,
-        row.price.toFixed(2).replace('.', ','),
-        row.origin === 'manual' ? 'Inserita' : 'Storico',
-        row.month,
-        row.quarter,
-        row.year
-      ].map(csvEscape).join(';'));
+      const core = isVaschetta()
+        ? [row.offerDate, row.expiryDate, row.supermarket, row.product, row.weightGrams || '', row.price.toFixed(2).replace('.', ','), Number(row.comparisonPrice || row.price).toFixed(2).replace('.', ','), row.origin === 'manual' ? 'Inserita' : 'Storico', row.month, row.quarter, row.year]
+        : [row.offerDate, row.expiryDate, row.supermarket, row.product, row.type, row.price.toFixed(2).replace('.', ','), row.origin === 'manual' ? 'Inserita' : 'Storico', row.month, row.quarter, row.year];
+      lines.push(core.map(csvEscape).join(';'));
     });
-    downloadBlob(`\uFEFF${lines.join('\r\n')}`, `CDP_offerte_${M.localIsoDate()}.csv`, 'text/csv;charset=utf-8');
-    showToast('CSV completo esportato');
+    downloadBlob(`\uFEFF${lines.join('\r\n')}`, `CDP_${state.mode}_offerte_${M.localIsoDate()}.csv`, 'text/csv;charset=utf-8');
+    showToast('CSV della modalità corrente esportato');
   }
 
   function showSection(id) {
-    $$('.section').forEach((section) => section.classList.toggle('active', section.id === id));
-    $$('.nav button').forEach((button) => button.classList.toggle('active', button.dataset.section === id));
+    $('.section').forEach((section) => section.classList.toggle('active', section.id === id));
+    $('.nav button').forEach((button) => button.classList.toggle('active', button.dataset.section === id));
     const titles = {
       dashboard: 'Dashboard',
       manage: 'Nuova offerta',
@@ -3225,33 +3906,44 @@ window.CDP_CONFIG = {
   }
 
   function wireEvents() {
-    $$('.nav button').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
-    $$('[data-go]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.go)));
+    $('.nav button').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
+    $('[data-go]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.go)));
+    $('[data-mode]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
+    $('[data-mode-switch]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.modeSwitch)));
 
     $('#auth-top-button').addEventListener('click', () => { showSection('manage'); if (!state.session) setTimeout(() => $('#auth-email')?.focus(), 50); });
     $('#auth-form').addEventListener('submit', handleAuthSubmit);
     $('#auth-logout').addEventListener('click', handleLogout);
     $('#catalog-supermarket-form').addEventListener('submit', handleAddSupermarket);
+    $('#brand-form').addEventListener('submit', handleAddBrand);
     $('#catalog-product-form').addEventListener('submit', handleAddProduct);
+    $('#variant-form').addEventListener('submit', handleAddVariant);
 
     $('#offer-form').addEventListener('submit', handleOfferSubmit);
     $('#offer-form').addEventListener('reset', () => {
       showFormMessage('', '');
-      setTimeout(() => { setFormDate(); renderCombinationStats(); }, 0);
+      setTimeout(() => { setFormDate(); renderManage(); renderCombinationStats(); }, 0);
     });
     $('#offer-supermarket').addEventListener('change', renderCombinationStats);
     $('#offer-product').addEventListener('change', (event) => {
       const product = state.catalogs.products.find((item) => String(item.id) === String(event.target.value));
-      if (product?.default_type) $('#offer-type').value = product.default_type;
+      if (!isVaschetta() && product?.default_type) $('#offer-type').value = product.default_type;
+      renderOfferVariantOptions();
+      renderOfferPricePreview();
       renderCombinationStats();
     });
+    $('#offer-variant').addEventListener('change', renderOfferPricePreview);
+    $('#offer-price').addEventListener('input', renderOfferPricePreview);
 
-    $('#product-select').addEventListener('change', (event) => renderProductDetail(event.target.value));
+    $('#product-select').addEventListener('change', (event) => {
+      renderProductDetail(event.target.value);
+      $('[data-product-card]').forEach((button) => button.closest('.product-card')?.classList.toggle('selected', button.dataset.productCard === event.target.value));
+    });
     $('#supermarket-select').addEventListener('change', (event) => renderSupermarketDetail(event.target.value));
     $('#public-combination-supermarket').addEventListener('change', renderPublicCombinationStats);
     $('#public-combination-product').addEventListener('change', renderPublicCombinationStats);
 
-    $$('#live-granularity button').forEach((button) => button.addEventListener('click', () => {
+    $('#live-granularity button').forEach((button) => button.addEventListener('click', () => {
       state.liveGranularity = button.dataset.granularity;
       state.livePeriod = '';
       renderLive();
@@ -3277,17 +3969,29 @@ window.CDP_CONFIG = {
       if (deleteButton) handleDeleteOffer(deleteButton.dataset.deleteOffer);
       const renewButton = event.target.closest('[data-renew-supermarket]');
       if (renewButton) prefillSupermarketRenewal(renewButton.dataset.renewSupermarket);
+      const productCard = event.target.closest('[data-product-card]');
+      if (productCard) {
+        $('#product-select').value = productCard.dataset.productCard;
+        renderProductDetail(productCard.dataset.productCard);
+        $('[data-product-card]').forEach((button) => button.closest('.product-card')?.classList.toggle('selected', button === productCard));
+      }
       const focusButton = event.target.closest('[data-focus-catalog]');
       if (focusButton) {
         const target = focusButton.dataset.focusCatalog === 'supermarket' ? '#catalog-supermarket-name' : '#catalog-product-name';
         $(target)?.focus();
       }
     });
+
+    document.addEventListener('change', (event) => {
+      const input = event.target.closest('[data-brand-upload], [data-product-upload]');
+      if (input) handleMediaUpload(input);
+    });
   }
 
   async function init() {
     wireEvents();
     setFormDate();
+    renderModeUi();
     const cloudState = Cloud.configure(window.CDP_CONFIG || {});
     const localAllowed = Local.isLocalEnvironment(window.location);
     state.cloudMode = cloudState.configured;
@@ -3300,6 +4004,7 @@ window.CDP_CONFIG = {
         state.isAdmin = state.session ? await Cloud.isAdmin() : false;
         setStorageStatus(true, 'Supabase online · aggiornamento realtime');
         updateAuthUi();
+        renderModeUi();
         refreshAll();
         Cloud.subscribe(() => {
           clearTimeout(state.realtimeTimer);
@@ -3317,11 +4022,13 @@ window.CDP_CONFIG = {
           state.isAdmin = !!state.session;
           setStorageStatus(true, 'Supabase non raggiungibile · archivio locale attivo');
         } else {
-          state.rows = historicalRows.slice();
-          rebuildRows();
+          state.allRows = historicalRows.slice();
+          state.allCatalogs = buildReadOnlyCatalogs(state.allRows);
+          applyModeScope();
           setStorageStatus(false, 'Supabase non raggiungibile · sola lettura');
         }
         updateAuthUi();
+        renderModeUi();
         refreshAll();
         showToast(error.message || 'Impossibile caricare i dati da Supabase', 'error');
       }
@@ -3332,12 +4039,15 @@ window.CDP_CONFIG = {
       state.isAdmin = !!state.session;
       setStorageStatus(true, 'Archivio locale · dati salvati nel browser');
       updateAuthUi();
+      renderModeUi();
       refreshAll();
     } else {
-      state.rows = historicalRows.slice();
-      rebuildRows();
+      state.allRows = historicalRows.slice();
+      state.allCatalogs = buildReadOnlyCatalogs(state.allRows);
+      applyModeScope();
       setStorageStatus(false, 'Sola lettura · configura Supabase');
       updateAuthUi();
+      renderModeUi();
       refreshAll();
     }
 

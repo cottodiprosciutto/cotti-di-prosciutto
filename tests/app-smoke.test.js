@@ -59,3 +59,11 @@ test('la app rende pubblica la sezione Analisi combinazioni', () => {
   assert.match(source, /public-combination-product/);
   assert.match(source, /combinations:\s*'Analisi combinazioni'/);
 });
+
+test('la app pulisce i pannelli dipendenti dai dati quando una modalità non ha offerte', () => {
+  assert.match(source, /Nessun supermercato con offerte disponibile per questa modalità\./);
+  assert.match(source, /C\.horizontalBar\(\$\('#supermarket-products-chart'\), \[\], \{\}\)/);
+  assert.match(source, /C\.line\(\$\('#live-trend-chart'\), \[\], \{\}\)/);
+  assert.match(source, /C\.horizontalBar\(\$\('#live-count-chart'\), \[\], \{\}\)/);
+  assert.match(source, /\$\('#live-history-table'\)\.innerHTML = ''/);
+});

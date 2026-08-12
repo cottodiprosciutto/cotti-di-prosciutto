@@ -129,3 +129,16 @@ test('filterRows supporta origine e ricerca sulla data offerta', () => {
   assert.deepEqual(A.filterRows(sample, { origin: 'manual' }).map(r => r.product), ['B']);
   assert.deepEqual(A.filterRows(sample, { query: '2026-08-10' }).map(r => r.product), ['A']);
 });
+
+test('summary dataset vuoto è sicuro per una modalità senza offerte', () => {
+  const summary = A.summarize([]);
+  assert.equal(summary.records, 0);
+  assert.equal(summary.averagePrice, 0);
+  assert.equal(summary.minPrice, 0);
+  assert.equal(summary.maxPrice, 0);
+  assert.equal(summary.top5Share, 0);
+  assert.equal(summary.top10Share, 0);
+  assert.equal(summary.highestAverageProduct, null);
+  assert.equal(summary.highestAverageSupermarket, null);
+  assert.equal(summary.lowestAverageSupermarket, null);
+});

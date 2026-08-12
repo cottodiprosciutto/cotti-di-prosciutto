@@ -26,3 +26,9 @@ test('gli script Supabase e cloud store vengono caricati prima della app', () =>
   assert.ok(sdk >= 0 && model >= 0 && store >= 0 && app >= 0);
   assert.ok(sdk < store && model < store && store < app);
 });
+
+test('la pagina permette di scegliere taglio o vaschetta e gestire immagini', () => {
+  for (const id of ['mode-gate', 'mode-taglio', 'mode-vaschetta', 'mode-switch', 'offer-variant', 'brand-form', 'brand-logo', 'catalog-product-brand', 'catalog-product-image', 'product-card-grid']) {
+    assert.match(html, new RegExp(`id=["']${id}["']`), `manca #${id}`);
+  }
+});

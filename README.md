@@ -23,27 +23,30 @@ Le nuove offerte, i nuovi supermercati e i nuovi prosciutti vengono salvati nel 
 
 Compila `js/config.js` con `supabaseUrl` e `supabasePublishableKey`. Quando Supabase è configurato e raggiungibile, il gestionale usa automaticamente il database cloud e il login Supabase.
 
-Gli script SQL sono nella cartella `supabase/`:
+Gli script SQL sono nella cartella `supabase/`. Per una **nuova installazione** usa `schema.sql`, `seed.sql` ed `enable-admin.sql`.
 
-- `schema.sql`
-- `seed.sql`
-- `enable-admin.sql`
-
-Segui `TODO-LIVE.md` per la pubblicazione su GitHub Pages.
+Per aggiornare un'installazione **già online** alla gestione Taglio + Vaschetta usa invece `AGGIORNAMENTO_V2_TAGLIO_VASCHETTA.md`: contiene l'ordine sicuro di backup, migration, deploy e import, senza reimportare lo storico al taglio.
 
 ## Sezioni principali
+
+All'avvio scegli **Prosciutti al taglio** oppure **Cotti in vaschetta**; lo switch resta disponibile nella barra superiore.
 
 - Dashboard
 - Nuova offerta e stato rinnovo per supermercato
 - Statistiche live per mese, trimestre e anno
 - **Analisi combinazioni pubblica** Supermercato × Prosciutto
 - Andamento Top 10 prodotti
-- Prodotti
+- Prodotti con marchio, logo, immagine e grammature per la vaschetta
 - Supermercati
 - Tutti i dati con ordinamento per data
 
-## Test
+Le statistiche live di mese, trimestre e anno sono generate dinamicamente fino alla data corrente/ultima offerta: non richiedono aggiornamenti manuali al cambio anno.
+
+## Test e build
 
 ```bash
 npm test
+npm run build
 ```
+
+`npm run build` rigenera anche `CDP_2026_Gestionale.html` a partire dai file modulari, evitando che la versione standalone diverga da GitHub Pages.

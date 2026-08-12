@@ -6,6 +6,7 @@
   'use strict';
 
   const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  const priceOf = (row) => Number.isFinite(Number(row?.comparisonPrice)) ? Number(row.comparisonPrice) : Number(row?.price || 0);
 
   function median(values) {
     if (!values.length) return 0;
@@ -47,7 +48,8 @@
 
   function aggregateEntity(rows, entityKey, relatedKey) {
     return [...groupBy(rows, entityKey).entries()].map(([name, entityRows]) => {
-      const prices = entityRows.map((row) => row.price);
+      const prices = entityRows.map(priceOf);
+      const packagePrices = entityRows.map((row) => Number(row.price || 0));
       const expiryDates = entityRows.map((row) => row.expiryDate).sort();
       const related = new Set(entityRows.map((row) => row[relatedKey]));
       const types = [...new Set(entityRows.map((row) => row.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'it'));
@@ -60,6 +62,7 @@
         minPrice: Math.min(...prices),
         maxPrice: Math.max(...prices),
         stdDev: standardDeviation(prices),
+        averagePackagePrice: average(packagePrices),
         firstExpiry: expiryDates[0],
         lastExpiry: expiryDates[expiryDates.length - 1],
         types
@@ -80,7 +83,7 @@
   function monthlyStats(rows) {
     return [...groupBy(rows, 'month').entries()]
       .map(([month, monthRows]) => {
-        const prices = monthRows.map((row) => row.price);
+        const prices = monthRows.map(priceOf);
         return {
           month,
           count: monthRows.length,
@@ -98,7 +101,7 @@
   function quarterlyStats(rows) {
     return [...groupBy(rows, 'quarter').entries()]
       .map(([quarter, quarterRows]) => {
-        const prices = quarterRows.map((row) => row.price);
+        const prices = quarterRows.map(priceOf);
         return {
           quarter,
           count: quarterRows.length,
@@ -118,7 +121,7 @@
     return [...groupBy(rows, 'year').entries()]
       .filter(([year]) => Boolean(year))
       .map(([year, yearRows]) => {
-        const prices = yearRows.map((row) => row.price);
+        const prices = yearRows.map(priceOf);
         return {
           year,
           count: yearRows.length,
@@ -141,6 +144,45 @@
     assertGranularity(granularity);
     return [...new Set(rows.map((row) => row[granularity]).filter(Boolean))]
       .sort((a, b) => String(b).localeCompare(String(a)));
+  }
+
+  function periodKeysThroughDate(rows, granularity, currentDate) {
+    assertGranularity(granularity);
+    const existing = periodKeys(rows, granularity);
+    if (!existing.length) return [];
+    const current = /^\d{4}-\d{2}-\d{2}$/.test(String(currentDate || '')) ? String(currentDate) : new Date().toISOString().slice(0, 10);
+    const earliestOffer = [...rows].map((row) => row.offerDate).filter(Boolean).sort()[0];
+    const latestOffer = [...rows].map((row) => row.offerDate).filter(Boolean).sort().slice(-1)[0];
+    const start = earliestOffer || `${existing[existing.length - 1].slice(0, 4)}-01-01`;
+    const end = latestOffer && latestOffer > current ? latestOffer : current;
+    const startYear = Number(start.slice(0, 4));
+    const startMonth = Number(start.slice(5, 7) || 1);
+    const endYear = Number(end.slice(0, 4));
+    const endMonth = Number(end.slice(5, 7) || 1);
+    const keys = [];
+    if (granularity === 'year') {
+      for (let year = endYear; year >= startYear; year -= 1) keys.push(String(year));
+      return keys;
+    }
+    if (granularity === 'month') {
+      let year = endYear;
+      let month = endMonth;
+      while (year > startYear || (year === startYear && month >= startMonth)) {
+        keys.push(`${year}-${String(month).padStart(2, '0')}`);
+        month -= 1;
+        if (month === 0) { month = 12; year -= 1; }
+      }
+      return keys;
+    }
+    let year = endYear;
+    let quarter = Math.floor((endMonth - 1) / 3) + 1;
+    const startQuarter = Math.floor((startMonth - 1) / 3) + 1;
+    while (year > startYear || (year === startYear && quarter >= startQuarter)) {
+      keys.push(`${year}-Q${quarter}`);
+      quarter -= 1;
+      if (quarter === 0) { quarter = 4; year -= 1; }
+    }
+    return keys;
   }
 
   function rowsForPeriod(rows, granularity, key) {
@@ -172,7 +214,7 @@
     if (!subset.length) {
       return { key, count: 0, products: 0, supermarkets: 0, averagePrice: 0, medianPrice: 0, minPrice: 0, maxPrice: 0 };
     }
-    const prices = subset.map((row) => row.price);
+    const prices = subset.map(priceOf);
     return {
       key,
       count: subset.length,
@@ -192,7 +234,7 @@
       .map(([groupKey, groupRows]) => ({
         key: groupKey,
         count: groupRows.length,
-        averagePrice: average(groupRows.map((row) => row.price))
+        averagePrice: average(groupRows.map(priceOf))
       }))
       .sort((a, b) => a.key.localeCompare(b.key));
   }
@@ -203,10 +245,10 @@
         type,
         count: typeRows.length,
         share: typeRows.length / rows.length,
-        averagePrice: average(typeRows.map((row) => row.price)),
-        medianPrice: median(typeRows.map((row) => row.price)),
-        minPrice: Math.min(...typeRows.map((row) => row.price)),
-        maxPrice: Math.max(...typeRows.map((row) => row.price))
+        averagePrice: average(typeRows.map(priceOf)),
+        medianPrice: median(typeRows.map(priceOf)),
+        minPrice: Math.min(...typeRows.map(priceOf)),
+        maxPrice: Math.max(...typeRows.map(priceOf))
       }))
       .sort((a, b) => b.count - a.count);
   }
@@ -215,7 +257,7 @@
     return [...groupBy(rows.filter((row) => row.product === product), 'month').entries()]
       .map(([month, monthRows]) => ({
         month,
-        averagePrice: average(monthRows.map((row) => row.price)),
+        averagePrice: average(monthRows.map(priceOf)),
         count: monthRows.length
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
@@ -227,7 +269,7 @@
       name,
       count: itemRows.length,
       share: subset.length ? itemRows.length / subset.length : 0,
-      averagePrice: average(itemRows.map((row) => row.price))
+      averagePrice: average(itemRows.map(priceOf))
     }));
     return denseRank(entries, 'count', maxRank);
   }
@@ -238,7 +280,7 @@
       name,
       count: itemRows.length,
       share: subset.length ? itemRows.length / subset.length : 0,
-      averagePrice: average(itemRows.map((row) => row.price))
+      averagePrice: average(itemRows.map(priceOf))
     }));
     return denseRank(entries, 'count', maxRank);
   }
@@ -246,7 +288,7 @@
   function summarize(rows) {
     const products = productStats(rows);
     const supermarkets = supermarketStats(rows);
-    const prices = rows.map((row) => row.price);
+    const prices = rows.map(priceOf);
     const top5Count = products.slice(0, 5).reduce((sum, product) => sum + product.count, 0);
     const top10Count = products.slice(0, 10).reduce((sum, product) => sum + product.count, 0);
     const productByAverage = [...products].sort((a, b) => b.averagePrice - a.averagePrice);
@@ -257,14 +299,14 @@
       supermarkets: supermarkets.length,
       averagePrice: average(prices),
       medianPrice: median(prices),
-      minPrice: Math.min(...prices),
-      maxPrice: Math.max(...prices),
-      top5Share: top5Count / rows.length,
-      top10Share: top10Count / rows.length,
+      minPrice: prices.length ? Math.min(...prices) : 0,
+      maxPrice: prices.length ? Math.max(...prices) : 0,
+      top5Share: rows.length ? top5Count / rows.length : 0,
+      top10Share: rows.length ? top10Count / rows.length : 0,
       topProducts: products.slice(0, 10),
-      highestAverageProduct: productByAverage[0],
-      highestAverageSupermarket: supermarketByAverage[0],
-      lowestAverageSupermarket: supermarketByAverage[supermarketByAverage.length - 1],
+      highestAverageProduct: productByAverage[0] || null,
+      highestAverageSupermarket: supermarketByAverage[0] || null,
+      lowestAverageSupermarket: supermarketByAverage[supermarketByAverage.length - 1] || null,
       simpleProductAverage: average(products.map((item) => item.averagePrice)),
       simpleSupermarketAverage: average(supermarkets.map((item) => item.averagePrice))
     };
@@ -423,7 +465,7 @@
       };
     }
 
-    const prices = subset.map((row) => Number(row.price));
+    const prices = subset.map(priceOf);
     const latest = subset[subset.length - 1];
     const previous = subset.length > 1 ? subset[subset.length - 2] : null;
     const intervals = subset.slice(1).map((row, index) => isoDayDiff(subset[index].offerDate, row.offerDate));
@@ -434,8 +476,8 @@
     const year = current.slice(0, 4);
     const monthNumber = Number(current.slice(5, 7));
     const quarter = `${year}-Q${Math.floor((monthNumber - 1) / 3) + 1}`;
-    const priceDelta = previous ? Number(latest.price) - Number(previous.price) : null;
-    const priceDeltaPct = previous && Number(previous.price) !== 0 ? priceDelta / Number(previous.price) : null;
+    const priceDelta = previous ? priceOf(latest) - priceOf(previous) : null;
+    const priceDeltaPct = previous && priceOf(previous) !== 0 ? priceDelta / priceOf(previous) : null;
 
     return {
       supermarket,
@@ -444,8 +486,10 @@
       averagePrice: average(prices),
       minPrice: Math.min(...prices),
       maxPrice: Math.max(...prices),
-      lastPrice: Number(latest.price),
-      previousPrice: previous ? Number(previous.price) : null,
+      lastPrice: priceOf(latest),
+      lastPackagePrice: Number(latest.price),
+      averagePackagePrice: average(subset.map((row) => Number(row.price || 0))),
+      previousPrice: previous ? priceOf(previous) : null,
       priceDelta,
       priceDeltaPct,
       lastOfferDate: latest.offerDate,
@@ -462,7 +506,9 @@
       trend: subset.map((row) => ({
         offerDate: row.offerDate,
         expiryDate: row.expiryDate || '',
-        price: Number(row.price),
+        price: priceOf(row),
+        packagePrice: Number(row.price),
+        weightGrams: row.weightGrams || null,
         type: row.type || ''
       }))
     };
@@ -495,6 +541,7 @@
     quarterlyStats,
     yearlyStats,
     periodKeys,
+    periodKeysThroughDate,
     rowsForPeriod,
     previousPeriodKey,
     periodSummary,

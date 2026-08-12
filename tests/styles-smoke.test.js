@@ -16,3 +16,9 @@ test('sono presenti gli stili delle nuove aree gestionali', () => {
     assert.ok(css.includes(selector), `manca ${selector}`);
   }
 });
+
+test('il tema contiene selettore modalità e card prodotto con immagini', () => {
+  for (const selector of ['.mode-gate', '.mode-choice-grid', '.mode-switch', '.product-card-grid', '.product-card', '.product-media', '.brand-logo']) {
+    assert.ok(css.includes(selector), `manca ${selector}`);
+  }
+});

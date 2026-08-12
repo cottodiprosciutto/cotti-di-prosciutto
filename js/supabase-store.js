@@ -14,12 +14,7 @@
     if (!match) throw new Error('Data offerta non valida');
     const year = Number(match[1]);
     const month = Number(match[2]);
-    const quarter = Math.floor((month - 1) / 3) + 1;
-    return {
-      month: `${year}-${String(month).padStart(2, '0')}`,
-      quarter: `${year}-Q${quarter}`,
-      year: String(year)
-    };
+    return { month: `${year}-${String(month).padStart(2, '0')}`, quarter: `${year}-Q${Math.floor((month - 1) / 3) + 1}`, year: String(year) };
   }
 
   function isConfigured(candidate = config) {
@@ -34,9 +29,7 @@
     config = nextConfig || root.CDP_CONFIG || {};
     client = null;
     if (isConfigured(config) && root.supabase && typeof root.supabase.createClient === 'function') {
-      client = root.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
-        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-      });
+      client = root.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     }
     return { configured: isConfigured(config), sdkAvailable: !!(root.supabase && root.supabase.createClient), client };
   }
@@ -48,24 +41,34 @@
     return client;
   }
 
-  function relationValue(value) {
-    return Array.isArray(value) ? value[0] : value;
-  }
+  function relationValue(value) { return Array.isArray(value) ? value[0] : value; }
 
   function normalizeOfferRow(row) {
     const supermarket = relationValue(row.supermarket || row.supermarkets) || {};
     const product = relationValue(row.product || row.products) || {};
+    const variant = relationValue(row.variant || row.product_variants) || {};
+    const brand = relationValue(product.brand || product.brands) || {};
     const offerDate = row.offer_date || row.offerDate;
     const expiryDate = row.expiry_date || row.expiryDate;
     const origin = row.source || row.origin || 'manual';
+    const mode = String(product.mode || row.mode || 'taglio');
+    const price = Number(row.price);
+    const weightGrams = variant.weight_grams == null ? null : Number(variant.weight_grams);
+    const comparisonPrice = mode === 'vaschetta' && weightGrams ? Math.round((price * 1000 / weightGrams) * 100) / 100 : price;
     return {
       id: String(row.id),
       supermarketId: supermarket.id ? String(supermarket.id) : String(row.supermarket_id || row.supermarketId || ''),
       productId: product.id ? String(product.id) : String(row.product_id || row.productId || ''),
+      variantId: variant.id ? String(variant.id) : (row.variant_id ? String(row.variant_id) : null),
       supermarket: supermarket.name || row.supermarket || '',
       product: product.name || row.product || '',
+      mode,
       type: row.type || product.default_type || '',
-      price: Number(row.price),
+      price,
+      weightGrams,
+      comparisonPrice,
+      brand: brand.id ? { id: String(brand.id), name: brand.name || '', logo_path: brand.logo_path || '' } : null,
+      productImagePath: product.image_path || '',
       offerDate,
       expiryDate,
       ...periodFields(offerDate),
@@ -75,7 +78,7 @@
     };
   }
 
-  const OFFER_SELECT = 'id,type,price,offer_date,expiry_date,source,created_at,supermarket:supermarkets(id,name),product:products(id,name,default_type)';
+  const OFFER_SELECT = 'id,type,price,offer_date,expiry_date,source,created_at,supermarket:supermarkets(id,name),product:products(id,name,default_type,mode,image_path,brand_id,brand:brands(id,name,logo_path)),variant:product_variants(id,weight_grams)';
 
   async function loadDataset() {
     const { data, error } = await getClient().from('offers').select(OFFER_SELECT).order('offer_date', { ascending: true });
@@ -85,43 +88,27 @@
 
   async function loadCatalogs() {
     const db = getClient();
-    const [supermarketsResult, productsResult] = await Promise.all([
+    const [supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
       db.from('supermarkets').select('id,name').order('name', { ascending: true }),
-      db.from('products').select('id,name,default_type').order('name', { ascending: true })
+      db.from('products').select('id,name,default_type,mode,brand_id,image_path,brand:brands(id,name,logo_path)').order('name', { ascending: true }),
+      db.from('brands').select('id,name,slug,logo_path').order('name', { ascending: true }),
+      db.from('product_variants').select('id,product_id,weight_grams').order('weight_grams', { ascending: true })
     ]);
-    if (supermarketsResult.error) throw supermarketsResult.error;
-    if (productsResult.error) throw productsResult.error;
-    return { supermarkets: supermarketsResult.data || [], products: productsResult.data || [] };
+    for (const result of [supermarketsResult, productsResult, brandsResult, variantsResult]) if (result.error) throw result.error;
+    return { supermarkets: supermarketsResult.data || [], products: productsResult.data || [], brands: brandsResult.data || [], variants: variantsResult.data || [] };
   }
 
-  async function getSession() {
-    const { data, error } = await getClient().auth.getSession();
-    if (error) throw error;
-    return data?.session || null;
-  }
-
-  async function signIn(email, password) {
-    const { data, error } = await getClient().auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') });
-    if (error) throw error;
-    return data?.session || null;
-  }
-
-  async function signOut() {
-    const { error } = await getClient().auth.signOut();
-    if (error) throw error;
-  }
-
-  async function isAdmin() {
-    const { data, error } = await getClient().rpc('is_admin');
-    if (error) throw error;
-    return data === true;
-  }
+  async function getSession() { const { data, error } = await getClient().auth.getSession(); if (error) throw error; return data?.session || null; }
+  async function signIn(email, password) { const { data, error } = await getClient().auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') }); if (error) throw error; return data?.session || null; }
+  async function signOut() { const { error } = await getClient().auth.signOut(); if (error) throw error; }
+  async function isAdmin() { const { data, error } = await getClient().rpc('is_admin'); if (error) throw error; return data === true; }
 
   async function addOffer(input) {
     const payload = {
       supermarket_id: input.supermarketId,
       product_id: input.productId,
-      type: String(input.type || '').trim(),
+      variant_id: input.variantId || null,
+      type: String(input.type || '').trim() || null,
       price: Number(input.price),
       offer_date: input.offerDate,
       expiry_date: input.expiryDate,
@@ -132,10 +119,7 @@
     return normalizeOfferRow(data);
   }
 
-  async function deleteOffer(id) {
-    const { error } = await getClient().from('offers').delete().eq('id', id);
-    if (error) throw error;
-  }
+  async function deleteOffer(id) { const { error } = await getClient().from('offers').delete().eq('id', id); if (error) throw error; }
 
   async function addSupermarket(name) {
     const normalized = String(name || '').trim();
@@ -145,22 +129,88 @@
     return data;
   }
 
-  async function addProduct(name, defaultType) {
+  async function addBrand(name) {
     const normalized = String(name || '').trim();
-    if (!normalized) throw new Error('Nome prosciutto obbligatorio');
-    const { data, error } = await getClient().from('products').insert({ name: normalized, default_type: String(defaultType || '').trim() || null }).select('id,name,default_type').single();
+    if (!normalized) throw new Error('Nome marchio obbligatorio');
+    const { data, error } = await getClient().from('brands').insert({ name: normalized }).select('id,name,slug,logo_path').single();
     if (error) throw error;
     return data;
+  }
+
+  async function addProduct(name, defaultType, options = {}) {
+    const normalized = String(name || '').trim();
+    if (!normalized) throw new Error('Nome prosciutto obbligatorio');
+    const payload = {
+      name: normalized,
+      default_type: String(defaultType || '').trim() || null,
+      mode: options.mode || 'taglio',
+      brand_id: options.brandId || null
+    };
+    const { data, error } = await getClient().from('products').insert(payload).select('id,name,default_type,mode,brand_id,image_path').single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function updateProduct(id, patch = {}) {
+    const payload = {};
+    if (Object.prototype.hasOwnProperty.call(patch, 'brandId')) payload.brand_id = patch.brandId || null;
+    if (Object.prototype.hasOwnProperty.call(patch, 'imagePath')) payload.image_path = patch.imagePath || null;
+    if (Object.prototype.hasOwnProperty.call(patch, 'defaultType')) payload.default_type = String(patch.defaultType || '').trim() || null;
+    const { data, error } = await getClient().from('products').update(payload).eq('id', id).select('id,name,default_type,mode,brand_id,image_path').single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function addVariant(productId, weightGrams) {
+    const weight = Number(weightGrams);
+    if (!Number.isInteger(weight) || weight <= 0) throw new Error('Peso non valido');
+    const { data, error } = await getClient().from('product_variants').insert({ product_id: productId, weight_grams: weight }).select('id,product_id,weight_grams').single();
+    if (error) throw error;
+    return data;
+  }
+
+  function safeFileName(file) {
+    const raw = String(file?.name || 'image').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+    return raw || 'image';
+  }
+
+  async function uploadFile(bucket, ownerId, file) {
+    if (!file) throw new Error('Seleziona una immagine');
+    if (!/^image\/(jpeg|png|webp)$/i.test(String(file.type || ''))) throw new Error('Formato immagine non supportato');
+    if (Number(file.size || 0) > 3 * 1024 * 1024) throw new Error('Immagine troppo grande: massimo 3 MB');
+    const path = `${ownerId}/${Date.now()}-${safeFileName(file)}`;
+    const { error } = await getClient().storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
+    if (error) throw error;
+    return path;
+  }
+
+  async function uploadBrandLogo(brandId, file) {
+    const path = await uploadFile('brand-logos', brandId, file);
+    const { data, error } = await getClient().from('brands').update({ logo_path: path }).eq('id', brandId).select('id,name,slug,logo_path').single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function uploadProductImage(productId, file) {
+    const path = await uploadFile('product-images', productId, file);
+    return updateProduct(productId, { imagePath: path });
+  }
+
+  function publicAssetUrl(bucket, path) {
+    if (!path) return '';
+    if (/^data:image\//i.test(String(path))) return String(path);
+    const { data } = getClient().storage.from(bucket).getPublicUrl(path);
+    return data?.publicUrl || '';
   }
 
   function subscribe(onChange) {
     const db = getClient();
     unsubscribe();
-    const channel = db.channel(`cdp-live-${Date.now()}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'supermarkets' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, onChange)
-      .subscribe();
+    let channel = db.channel(`cdp-live-${Date.now()}`);
+    ['offers', 'supermarkets', 'products', 'brands', 'product_variants'].forEach((table) => {
+      channel = channel.on('postgres_changes', { event: '*', schema: 'public', table }, onChange);
+    });
+    channel.subscribe();
     subscriptions = [channel];
     return () => unsubscribe();
   }
@@ -172,20 +222,10 @@
   }
 
   return {
-    isConfigured,
-    configure,
-    normalizeOfferRow,
-    loadDataset,
-    loadCatalogs,
-    getSession,
-    signIn,
-    signOut,
-    isAdmin,
-    addOffer,
-    deleteOffer,
-    addSupermarket,
-    addProduct,
-    subscribe,
-    unsubscribe
+    isConfigured, configure, normalizeOfferRow, loadDataset, loadCatalogs,
+    getSession, signIn, signOut, isAdmin,
+    addOffer, deleteOffer, addSupermarket, addBrand, addProduct, updateProduct, addVariant,
+    uploadBrandLogo, uploadProductImage, publicAssetUrl,
+    subscribe, unsubscribe
   };
 });

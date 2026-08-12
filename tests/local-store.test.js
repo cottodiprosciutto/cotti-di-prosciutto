@@ -58,3 +58,24 @@ test('sessione admin locale può essere aperta e chiusa', () => {
   Local.clearSession();
   assert.equal(Local.hasSession(), false);
 });
+
+test('catalogo locale distingue prodotti con stesso nome tra taglio e vaschetta', () => {
+  Local.clearAll();
+  const taglio = Local.addProduct('Rovagnati - GranBiscotto', 'Alta Qualità', { mode: 'taglio' });
+  const vaschetta = Local.addProduct('Rovagnati - GranBiscotto', '', { mode: 'vaschetta' });
+  assert.notEqual(taglio.id, vaschetta.id);
+  assert.equal(Local.loadCatalogExtras().products.length, 2);
+});
+
+test('catalogo locale gestisce marchi, varianti e immagini', () => {
+  Local.clearAll();
+  const brand = Local.addBrand('Rovagnati');
+  const product = Local.addProduct('Rovagnati - Snello', '', { mode: 'vaschetta', brandId: brand.id });
+  const variant = Local.addVariant(product.id, 100);
+  Local.setBrandLogo(brand.id, 'data:image/webp;base64,AAA');
+  Local.setProductImage(product.id, 'data:image/webp;base64,BBB');
+  const catalogs = Local.loadCatalogExtras();
+  assert.equal(catalogs.brands[0].logo_path, 'data:image/webp;base64,AAA');
+  assert.equal(catalogs.products[0].image_path, 'data:image/webp;base64,BBB');
+  assert.equal(catalogs.variants[0].id, variant.id);
+});

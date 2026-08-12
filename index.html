@@ -9,6 +9,23 @@
 </head>
 <body>
   <div class="ham-pattern" aria-hidden="true"></div>
+  <div id="mode-gate" class="mode-gate" role="dialog" aria-modal="true" aria-labelledby="mode-gate-title">
+    <div class="mode-gate-card">
+      <span class="eyebrow">Prosciutto Cotto Data</span>
+      <h2 id="mode-gate-title">Cosa vuoi consultare?</h2>
+      <p>Scegli il catalogo. Potrai cambiare modalità in qualsiasi momento dalla barra superiore.</p>
+      <div class="mode-choice-grid">
+        <button id="mode-taglio" class="mode-choice" type="button" data-mode="taglio">
+          <span class="mode-choice-visual mode-choice-taglio" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span><strong>Prosciutti al taglio</strong><small>Offerte e confronti con prezzo al kg</small></span>
+        </button>
+        <button id="mode-vaschetta" class="mode-choice" type="button" data-mode="vaschetta">
+          <span class="mode-choice-visual mode-choice-pack" aria-hidden="true"><span class="pack-label">100 g</span><span class="pack-slice"></span></span>
+          <span><strong>Cotti in vaschetta</strong><small>Prezzo confezione, grammatura e confronto €/kg</small></span>
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
@@ -46,6 +63,10 @@
           <h2 id="page-title">Dashboard</h2>
         </div>
         <div class="topbar-right">
+          <div id="mode-switch" class="mode-switch" aria-label="Modalità catalogo">
+            <button type="button" data-mode-switch="taglio">Al taglio</button>
+            <button type="button" data-mode-switch="vaschetta">In vaschetta</button>
+          </div>
           <div class="data-status" id="storage-status"><span class="status-dot"></span><span>Caricamento dati…</span></div>
           <div class="source" id="source-label"></div>
           <button id="auth-top-button" class="btn btn-soft btn-small" type="button">Area gestione</button>
@@ -153,14 +174,20 @@
                       <div class="field-label-row"><label for="offer-product">Prosciutto / prodotto</label><button class="inline-link" type="button" data-focus-catalog="product">+ Nuovo prosciutto</button></div>
                       <select id="offer-product" name="product" required></select>
                     </div>
-                    <div class="field">
+                    <div class="field" id="offer-type-field">
                       <label for="offer-type">Tipologia</label>
                       <input id="offer-type" name="type" list="type-options" autocomplete="off" placeholder="Es. Alta Qualità" required />
                       <datalist id="type-options"></datalist>
                     </div>
+                    <div class="field" id="offer-variant-field" hidden>
+                      <label for="offer-variant">Grammatura</label>
+                      <select id="offer-variant" name="variant"></select>
+                      <small>Seleziona il peso della confezione</small>
+                    </div>
                     <div class="field">
-                      <label for="offer-price">Prezzo (€)</label>
+                      <label for="offer-price" id="offer-price-label">Prezzo (€ / kg)</label>
                       <input id="offer-price" name="price" type="text" inputmode="decimal" placeholder="Es. 12,90" required />
+                      <small id="offer-price-equivalent"></small>
                     </div>
                     <div class="field">
                       <label for="offer-date">Data offerta</label>
@@ -188,11 +215,28 @@
                   <button class="btn btn-soft btn-small" type="submit">Aggiungi supermercato</button>
                 </form>
                 <div class="catalog-divider"></div>
+                <form id="brand-form" class="catalog-form">
+                  <div class="field"><label for="brand-name">Nuovo marchio</label><input id="brand-name" type="text" placeholder="Es. Rovagnati" required /></div>
+                  <div class="field"><label for="brand-logo">Logo marchio</label><input id="brand-logo" type="file" accept="image/jpeg,image/png,image/webp" /></div>
+                  <button class="btn btn-soft btn-small" type="submit">Aggiungi marchio</button>
+                </form>
+                <div class="catalog-divider"></div>
                 <form id="catalog-product-form" class="catalog-form">
                   <div class="field"><label for="catalog-product-name">Nuovo prosciutto</label><input id="catalog-product-name" type="text" placeholder="Marca - prodotto" required /></div>
-                  <div class="field"><label for="catalog-product-type">Tipologia predefinita</label><input id="catalog-product-type" type="text" list="type-options" placeholder="Es. Alta Qualità" /></div>
+                  <div class="field"><label for="catalog-product-brand">Marchio</label><select id="catalog-product-brand"></select></div>
+                  <div class="field" id="catalog-product-type-field"><label for="catalog-product-type">Tipologia predefinita</label><input id="catalog-product-type" type="text" list="type-options" placeholder="Es. Alta Qualità" /></div>
+                  <div class="field" id="catalog-product-weight-field" hidden><label for="catalog-product-weight">Prima grammatura (g)</label><input id="catalog-product-weight" type="number" min="1" step="1" placeholder="Es. 100" /></div>
+                  <div class="field"><label for="catalog-product-image">Immagine prodotto</label><input id="catalog-product-image" type="file" accept="image/jpeg,image/png,image/webp" /></div>
                   <button class="btn btn-soft btn-small" type="submit">Aggiungi prosciutto</button>
                 </form>
+                <div class="catalog-divider"></div>
+                <form id="variant-form" class="catalog-form" hidden>
+                  <div class="field"><label for="variant-product">Prodotto vaschetta</label><select id="variant-product"></select></div>
+                  <div class="field"><label for="variant-weight">Nuova grammatura (g)</label><input id="variant-weight" type="number" min="1" step="1" placeholder="Es. 120" required /></div>
+                  <button class="btn btn-soft btn-small" type="submit">Aggiungi grammatura</button>
+                </form>
+                <div class="catalog-divider"></div>
+                <div id="catalog-media-grid" class="catalog-media-grid"></div>
                 <div class="catalog-divider"></div>
                 <div class="backup-actions compact-backup">
                   <button id="export-backup" class="backup-action"><span>↓</span><div><strong>Esporta JSON</strong><small>Backup completo dell’archivio corrente</small></div></button>
@@ -310,6 +354,7 @@
           <div class="toolbar toolbar-panel">
             <div class="field"><label for="product-select">Prodotto</label><select id="product-select"></select></div>
           </div>
+          <div id="product-card-grid" class="product-card-grid"></div>
           <div id="product-detail"></div>
           <div class="grid-2">
             <div class="panel"><div class="panel-header"><div><h4 class="panel-title">Top 5 supermercati</h4><p class="panel-subtitle">Rank denso, pari merito inclusi</p></div></div><div id="product-supermarkets-chart" class="chart"></div></div>
@@ -346,7 +391,7 @@
               <div class="field"><label for="filter-query">Ricerca</label><input id="filter-query" type="search" placeholder="Prodotto, supermercato…" /></div>
               <div class="field"><label for="filter-supermarket">Supermercato</label><select id="filter-supermarket"></select></div>
               <div class="field"><label for="filter-product">Prodotto</label><select id="filter-product"></select></div>
-              <div class="field"><label for="filter-type">Tipologia</label><select id="filter-type"></select></div>
+              <div class="field" id="filter-type-field"><label for="filter-type">Tipologia</label><select id="filter-type"></select></div>
               <div class="field"><label for="filter-month">Mese offerta</label><select id="filter-month"></select></div>
               <div class="field"><label for="filter-origin">Origine</label><select id="filter-origin"><option value="">Tutte</option><option value="historical">Storico</option><option value="manual">Inserita</option></select></div>
               <div class="field"><label for="filter-sort">Ordina per data</label><select id="filter-sort"><option value="offerDateDesc">Data offerta — più recente</option><option value="offerDateAsc">Data offerta — meno recente</option><option value="expiryDateDesc">Data scadenza — più recente</option><option value="expiryDateAsc">Data scadenza — meno recente</option></select></div>
@@ -369,6 +414,7 @@
   <script src="js/config.js"></script>
   <script src="js/supabase-store.js"></script>
   <script src="js/local-store.js"></script>
+  <script src="js/mode-controller.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
