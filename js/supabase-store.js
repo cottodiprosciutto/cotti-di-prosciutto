@@ -78,25 +78,52 @@
     };
   }
 
-  const OFFER_SELECT = 'id,type,price,offer_date,expiry_date,source,created_at,supermarket:supermarkets(id,name),product:products(id,name,default_type,mode,image_path,brand_id,brand:brands(id,name,logo_path)),variant:product_variants(id,weight_grams)';
+  const OFFER_SELECT = 'id,supermarket_id,product_id,variant_id,type,price,offer_date,expiry_date,source,created_at';
 
-  async function loadDataset() {
-    const { data, error } = await getClient().from('offers').select(OFFER_SELECT).order('offer_date', { ascending: true });
-    if (error) throw error;
-    return (data || []).map(normalizeOfferRow);
+  function assembleSnapshot(raw = {}) {
+    const supermarkets = raw.supermarkets || [];
+    const brands = raw.brands || [];
+    const variants = raw.variants || [];
+    const supermarketById = new Map(supermarkets.map((item) => [String(item.id), item]));
+    const brandById = new Map(brands.map((item) => [String(item.id), item]));
+    const variantById = new Map(variants.map((item) => [String(item.id), item]));
+    const products = (raw.products || []).map((item) => ({
+      ...item,
+      brand: item.brand_id ? (brandById.get(String(item.brand_id)) || null) : null
+    }));
+    const productById = new Map(products.map((item) => [String(item.id), item]));
+    const rows = (raw.offers || []).map((row) => normalizeOfferRow({
+      ...row,
+      supermarket: supermarketById.get(String(row.supermarket_id)) || null,
+      product: productById.get(String(row.product_id)) || null,
+      variant: row.variant_id ? (variantById.get(String(row.variant_id)) || null) : null
+    }));
+    return { rows, catalogs: { supermarkets, products, brands, variants } };
   }
 
-  async function loadCatalogs() {
+  async function loadSnapshot() {
     const db = getClient();
-    const [supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
+    const [offersResult, supermarketsResult, productsResult, brandsResult, variantsResult] = await Promise.all([
+      db.from('offers').select(OFFER_SELECT).order('offer_date', { ascending: true }),
       db.from('supermarkets').select('id,name').order('name', { ascending: true }),
-      db.from('products').select('id,name,default_type,mode,brand_id,image_path,brand:brands(id,name,logo_path)').order('name', { ascending: true }),
+      db.from('products').select('id,name,default_type,mode,brand_id,image_path').order('name', { ascending: true }),
       db.from('brands').select('id,name,slug,logo_path').order('name', { ascending: true }),
       db.from('product_variants').select('id,product_id,weight_grams').order('weight_grams', { ascending: true })
     ]);
-    for (const result of [supermarketsResult, productsResult, brandsResult, variantsResult]) if (result.error) throw result.error;
-    return { supermarkets: supermarketsResult.data || [], products: productsResult.data || [], brands: brandsResult.data || [], variants: variantsResult.data || [] };
+    for (const result of [offersResult, supermarketsResult, productsResult, brandsResult, variantsResult]) {
+      if (result.error) throw result.error;
+    }
+    return assembleSnapshot({
+      offers: offersResult.data || [],
+      supermarkets: supermarketsResult.data || [],
+      products: productsResult.data || [],
+      brands: brandsResult.data || [],
+      variants: variantsResult.data || []
+    });
   }
+
+  async function loadDataset() { return (await loadSnapshot()).rows; }
+  async function loadCatalogs() { return (await loadSnapshot()).catalogs; }
 
   async function getSession() { const { data, error } = await getClient().auth.getSession(); if (error) throw error; return data?.session || null; }
   async function signIn(email, password) { const { data, error } = await getClient().auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') }); if (error) throw error; return data?.session || null; }
@@ -116,7 +143,7 @@
     };
     const { data, error } = await getClient().from('offers').insert(payload).select(OFFER_SELECT).single();
     if (error) throw error;
-    return normalizeOfferRow(data);
+    return data;
   }
 
   async function deleteOffer(id) { const { error } = await getClient().from('offers').delete().eq('id', id); if (error) throw error; }
@@ -222,7 +249,7 @@
   }
 
   return {
-    isConfigured, configure, normalizeOfferRow, loadDataset, loadCatalogs,
+    isConfigured, configure, normalizeOfferRow, assembleSnapshot, loadSnapshot, loadDataset, loadCatalogs,
     getSession, signIn, signOut, isAdmin,
     addOffer, deleteOffer, addSupermarket, addBrand, addProduct, updateProduct, addVariant,
     uploadBrandLogo, uploadProductImage, publicAssetUrl,

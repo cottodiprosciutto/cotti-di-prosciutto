@@ -1009,9 +1009,9 @@
 
   async function reloadCloudData(options = {}) {
     if (!state.cloudMode) return;
-    const [rows, catalogs] = await Promise.all([Cloud.loadDataset(), Cloud.loadCatalogs()]);
-    state.allRows = rows;
-    state.allCatalogs = catalogs;
+    const snapshot = await Cloud.loadSnapshot();
+    state.allRows = snapshot.rows;
+    state.allCatalogs = snapshot.catalogs;
     applyModeScope();
     if (!options.skipRender) refreshAll();
   }
