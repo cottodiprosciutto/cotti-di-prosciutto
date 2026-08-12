@@ -152,7 +152,6 @@
 
   function renderModeUi() {
     $$('[data-mode-switch]').forEach((button) => button.classList.toggle('active', button.dataset.modeSwitch === state.mode));
-    $$('[data-mode]').forEach((button) => button.classList.toggle('active', button.dataset.mode === state.mode));
     const body = document.body;
     body.dataset.mode = state.mode;
     const heroTitle = $('.hero-card h3');
@@ -165,7 +164,7 @@
     if (productsTitle) productsTitle.textContent = isVaschetta() ? 'Cotti in vaschetta' : 'Prosciutti al taglio';
   }
 
-  function setMode(nextMode, options = {}) {
+  function setMode(nextMode) {
     state.mode = M.normalizeMode(nextMode);
     try { localStorage.setItem('cdp-mode', state.mode); } catch (_) { /* storage opzionale */ }
     state.page = 1;
@@ -173,10 +172,6 @@
     applyModeScope();
     renderModeUi();
     refreshAll();
-    if (options.closeGate !== false) {
-      const gate = $('#mode-gate');
-      if (gate) gate.hidden = true;
-    }
     showToast(`Catalogo ${modeLabel()} attivo`, 'neutral');
   }
 
@@ -1347,7 +1342,6 @@
   function wireEvents() {
     $$('.nav button').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
     $$('[data-go]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.go)));
-    $$('[data-mode]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
     $$('[data-mode-switch]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.modeSwitch)));
 
     $('#auth-top-button').addEventListener('click', () => { showSection('manage'); if (!state.session) setTimeout(() => $('#auth-email')?.focus(), 50); });

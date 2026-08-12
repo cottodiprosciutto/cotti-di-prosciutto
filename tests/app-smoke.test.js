@@ -67,3 +67,10 @@ test('la app pulisce i pannelli dipendenti dai dati quando una modalità non ha 
   assert.match(source, /C\.horizontalBar\(\$\('#live-count-chart'\), \[\], \{\}\)/);
   assert.match(source, /\$\('#live-history-table'\)\.innerHTML = ''/);
 });
+
+
+test('la modalità si cambia solo dalla barra superiore e non gestisce più il popup iniziale', () => {
+  assert.match(source, /\[data-mode-switch\]/);
+  assert.doesNotMatch(source, /\[data-mode\](?!-switch)/);
+  assert.doesNotMatch(source, /mode-gate/);
+});

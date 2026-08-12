@@ -17,8 +17,10 @@ test('sono presenti gli stili delle nuove aree gestionali', () => {
   }
 });
 
-test('il tema contiene selettore modalità e card prodotto con immagini', () => {
-  for (const selector of ['.mode-gate', '.mode-choice-grid', '.mode-switch', '.product-card-grid', '.product-card', '.product-media', '.brand-logo']) {
+test('il tema contiene lo switch superiore e le card prodotto con immagini', () => {
+  for (const selector of ['.mode-switch', '.product-card-grid', '.product-card', '.product-media', '.brand-logo']) {
     assert.ok(css.includes(selector), `manca ${selector}`);
   }
+  assert.ok(!css.includes('.mode-gate'), 'gli stili del popup iniziale non devono più essere presenti');
+  assert.ok(!css.includes('.mode-choice-grid'), 'gli stili delle scelte iniziali non devono più essere presenti');
 });
